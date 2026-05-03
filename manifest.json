@@ -1,6 +1,6 @@
 {
-  "name": "Knowledge Cards App",
-  "short_name": "KnowledgeCards",
+  "name": "Photo Moments App",
+  "short_name": "PhotoMoments",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f5f5",

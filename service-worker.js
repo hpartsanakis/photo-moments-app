@@ -1,4 +1,4 @@
-const CACHE_NAME = "knowledge-cards-v4";
+const CACHE_NAME = "knowledge-cards-v7";
 
 const ASSETS_TO_CACHE = [
   "./",
