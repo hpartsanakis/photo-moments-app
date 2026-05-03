@@ -1,27 +1,23 @@
-/* =========================================
-   1. RESET / BASE
-========================================= */
+/* =========================
+   BASE
+========================= */
 
 * {
   box-sizing: border-box;
 }
 
 :root {
-  --bg: #f4f5f7;
-  --surface: #ffffff;
-  --surface-soft: #fafafa;
-  --text: #1f2937;
-  --muted: #6b7280;
+  --bg: #0f172a;
+  --surface: #111827;
+  --card: #ffffff;
+  --text: #f9fafb;
+  --dark-text: #111827;
+  --muted: #94a3b8;
   --border: #e5e7eb;
-  --shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-  --radius: 14px;
-  --radius-lg: 18px;
-  --dark: #222222;
-  --green: #2ecc71;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
+  --accent: #f59e0b;
+  --danger: #fee2e2;
+  --radius: 18px;
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
 }
 
 body {
@@ -31,28 +27,38 @@ body {
   color: var(--text);
 }
 
-/* =========================================
-   2. HEADER
-========================================= */
+/* =========================
+   HEADER
+========================= */
 
 .app-header {
   position: sticky;
   top: 0;
-  z-index: 50;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
-  padding: 16px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  z-index: 20;
+  padding: 18px 16px 14px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
 }
 
-.header-top h1 {
+.app-header h1 {
   margin: 0;
-  font-size: 22px;
-  line-height: 1.2;
+  font-size: 25px;
 }
 
-.header-search {
-  margin-top: 12px;
+.app-header p {
+  margin: 4px 0 14px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+#searchInput {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  outline: none;
 }
 
 .header-actions {
@@ -62,262 +68,186 @@ body {
   gap: 10px;
 }
 
-.header-install {
-  margin-top: 10px;
-}
-
-/* =========================================
-   3. CONTROLS
-========================================= */
-
-#searchInput,
 #sortSelect,
-#addCardBtn,
-#installBtn {
-  min-height: 46px;
-  border-radius: 12px;
-  font-size: 16px;
-}
-
-#searchInput {
-  width: 100%;
-  padding: 0 14px;
-  border: 1px solid var(--border);
-  outline: none;
-  background: var(--surface-soft);
-  color: var(--text);
-}
-
-#searchInput::placeholder {
-  color: #9ca3af;
-}
-
-#sortSelect {
-  width: 100%;
+.install-btn {
+  min-height: 44px;
+  border-radius: 14px;
+  border: none;
   padding: 0 12px;
-  border: 1px solid var(--border);
-  outline: none;
-  background: var(--surface-soft);
-  color: var(--text);
+  font-size: 15px;
 }
 
-#addCardBtn {
-  border: none;
-  background: var(--dark);
+.install-btn {
+  background: var(--accent);
   color: white;
-  padding: 0 16px;
   cursor: pointer;
 }
 
-#installBtn {
-  width: 100%;
-  background: var(--green);
-  color: white;
-  border: none;
-  padding: 0 16px;
-  cursor: pointer;
-}
-
-#addCardBtn:hover,
-#installBtn:hover {
-  opacity: 0.95;
-}
-
-/* =========================================
-   4. COLLECTIONS BAR
-========================================= */
+/* =========================
+   COLLECTIONS
+========================= */
 
 .collections-bar {
   display: flex;
   gap: 10px;
   padding: 14px 16px 0;
   overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.collections-bar::-webkit-scrollbar {
-  display: none;
 }
 
 .collection-btn {
   border: none;
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
   padding: 10px 14px;
   border-radius: 999px;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  font-size: 14px;
   white-space: nowrap;
-  flex: 0 0 auto;
-  color: var(--text);
+  cursor: pointer;
 }
 
 .collection-btn.active {
-  background: var(--dark);
+  background: var(--accent);
   color: white;
 }
 
-/* =========================================
-   5. CARDS CONTAINER
-========================================= */
+/* =========================
+   CARDS
+========================= */
 
 .cards-container {
-  max-width: 920px;
-  margin: 0 auto;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
+  max-width: 760px;
+  margin: 0 auto 80px;
 }
 
-/* =========================================
-   6. CARD
-========================================= */
-
-.card {
-  background: var(--surface);
+.photo-card {
+  background: var(--card);
+  color: var(--dark-text);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
   overflow: hidden;
+  box-shadow: var(--shadow);
 }
 
-/* =========================================
-   7. CARD TOP / TOGGLE
-========================================= */
-
-.card-top {
+.photo-image {
   width: 100%;
-}
-
-.card-toggle {
-  width: 100%;
-  border: none;
-  background: var(--surface);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  text-align: left;
-  cursor: pointer;
-}
-
-.card-toggle:hover {
-  background: #f8f9fa;
-}
-
-.card-category {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: bold;
-  color: var(--muted);
-  background: #f1f3f5;
-  padding: 6px 10px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: var(--text);
-  line-height: 1.35;
-}
-
-/* =========================================
-   8. CARD BODY
-========================================= */
-
-.card-body {
-  padding: 0 16px 16px;
-  border-top: 1px solid #eeeeee;
-}
-
-.hidden-content {
-  display: none;
-}
-
-.card-image {
-  width: 100%;
-  border-radius: 10px;
-  margin: 14px 0 10px;
-  display: block;
+  height: 260px;
   object-fit: cover;
+  display: block;
 }
 
-.card-content {
-  margin: 14px 0 16px;
+.photo-placeholder {
+  height: 120px;
+  background: linear-gradient(135deg, #1e293b, #020617);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+}
+
+.photo-info {
+  padding: 16px;
+}
+
+.photo-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.photo-title {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+.photo-notes {
+  margin: 0 0 14px;
   line-height: 1.55;
-  color: #444;
-  font-size: 15px;
+  color: #374151;
 }
 
-/* =========================================
-   9. CARD ACTIONS
-========================================= */
+.info-box {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
 
-.card-actions {
+.info-box strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.info-box p {
+  margin: 0;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.photo-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
 }
 
 .edit-btn,
 .delete-btn {
   min-height: 42px;
-  padding: 8px 14px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
 }
 
 .edit-btn {
-  background: #e9ecef;
-  color: var(--text);
+  background: #e5e7eb;
 }
 
 .delete-btn {
-  background: #ffe3e3;
+  background: var(--danger);
   color: #7f1d1d;
 }
 
-/* =========================================
-   10. EMPTY STATE
-========================================= */
+/* =========================
+   FLOATING ADD BUTTON
+========================= */
 
-.empty-state {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 28px 20px;
-  text-align: center;
+.fab {
+  position: fixed;
+  right: 18px;
+  bottom: 22px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-size: 34px;
+  line-height: 1;
   box-shadow: var(--shadow);
+  cursor: pointer;
+  z-index: 30;
 }
 
-.empty-state h3 {
-  margin-top: 0;
-  margin-bottom: 8px;
-  font-size: 18px;
-}
-
-.empty-state p {
-  margin: 0;
-  color: var(--muted);
-}
-
-/* =========================================
-   11. MODAL
-========================================= */
+/* =========================
+   MODAL
+========================= */
 
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.58);
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding: 0;
+  z-index: 40;
 }
 
 .modal.hidden {
@@ -326,169 +256,98 @@ body {
 
 .modal-content {
   width: 100%;
-  max-width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  background: var(--surface);
-  border-radius: 18px 18px 0 0;
-  padding: 18px 16px 24px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  background: white;
+  color: var(--dark-text);
+  border-radius: 22px 22px 0 0;
+  padding: 20px 16px 28px;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .modal-header h2 {
   margin: 0;
-  font-size: 20px;
 }
 
 .close-btn {
   border: none;
   background: transparent;
-  font-size: 28px;
+  font-size: 30px;
   cursor: pointer;
-  line-height: 1;
-  min-width: 40px;
-  min-height: 40px;
 }
 
-/* =========================================
-   12. FORM
-========================================= */
+/* =========================
+   FORM
+========================= */
 
 .form-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 16px;
+  margin-bottom: 15px;
 }
 
 .form-group label {
-  margin-bottom: 6px;
   font-weight: bold;
+  margin-bottom: 6px;
   font-size: 14px;
 }
 
 .form-group input,
-.form-group textarea,
-.form-group select {
-  padding: 10px 12px;
-  font-size: 16px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  font-family: inherit;
-  outline: none;
-  background: white;
-  color: var(--text);
-}
-
 .form-group textarea {
-  resize: vertical;
-  min-height: 120px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 16px;
+  font-family: inherit;
 }
 
 .submit-btn {
   width: 100%;
-  min-height: 46px;
+  min-height: 48px;
   border: none;
-  background: var(--dark);
+  border-radius: 14px;
+  background: var(--surface);
   color: white;
-  padding: 12px 16px;
   font-size: 16px;
-  border-radius: 12px;
   cursor: pointer;
 }
 
-.submit-btn:hover {
-  opacity: 0.95;
+/* =========================
+   EMPTY STATE
+========================= */
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
 }
 
-/* =========================================
-   13. DESKTOP / TABLET
-========================================= */
+/* =========================
+   DESKTOP
+========================= */
 
 @media (min-width: 769px) {
   .app-header {
-    padding: 20px 30px;
+    padding: 24px 32px;
   }
 
-  .header-top h1 {
-    font-size: 28px;
-  }
-
-  .header-search {
-    margin-top: 14px;
-  }
-
-  .header-actions {
-    grid-template-columns: 220px auto;
-    justify-content: start;
-  }
-
-  .header-install {
-    width: 220px;
-  }
-
-  .collections-bar {
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 18px 24px 0;
-  }
-
-  .cards-container {
-    padding: 24px;
-  }
-
-  .card-toggle {
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .card-title {
-    font-size: 18px;
-  }
-
-  .card-actions {
-    display: flex;
-    gap: 10px;
-  }
-
-  .edit-btn,
-  .delete-btn {
-    min-height: auto;
+  .photo-image {
+    height: 360px;
   }
 
   .modal {
-    padding: 20px;
     align-items: center;
+    padding: 20px;
   }
 
   .modal-content {
-    max-width: 540px;
-    border-radius: 18px;
-    padding: 24px;
-  }
-
-  .modal-header h2 {
-    font-size: 24px;
-  }
-}
-
-/* =========================================
-   14. SAFE AREA SUPPORT
-========================================= */
-
-@supports (padding: max(0px)) {
-  .app-header {
-    padding-top: max(16px, env(safe-area-inset-top));
-  }
-
-  .modal-content {
-    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    max-width: 560px;
+    border-radius: 22px;
   }
 }

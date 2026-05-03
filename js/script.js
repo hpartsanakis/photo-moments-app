@@ -1,46 +1,42 @@
-/* =========================================
+/* =========================
    1. DATA
-========================================= */
+   Default cards for first app load
+========================= */
 
 const cards = [
   {
     id: 1,
-    collection: "photos",
-    category: "Street",
+    collection: "moments",
     title: "Blue Hour in Frankfurt",
-    content: "Best moment was 10 minutes after sunset near the river.",
+    location: "Frankfurt am Main",
+    content: "Perfect reflections after rain near the river.",
+    settings: "Nikon Z50 · 40mm · f/2.8 · 1/250s · ISO 200",
+    learning: "Blue hour gives softer contrast. Reflections become stronger after rain.",
     image: null
   },
   {
     id: 2,
-    collection: "recipes",
-    category: "Dinner",
-    title: "Greek Chicken Bowl",
-    content: "Chicken, rice, cucumber, tomato, yogurt sauce.",
-    image: null
-  },
-  {
-    id: 3,
-    collection: "travel",
-    category: "Norway",
-    title: "Tromsø Harbour",
-    content: "Perfect location for blue hour photos and night reflections.",
+    collection: "learning",
+    title: "Shutter Speed Practice",
+    location: "Photography Notes",
+    content: "Testing how shutter speed affects movement.",
+    settings: "1/1000s freezes action · 1/30s creates motion blur",
+    learning: "Fast shutter freezes movement. Slow shutter shows motion.",
     image: null
   }
 ];
 
-/* Load saved cards from localStorage */
-const savedCards = localStorage.getItem("knowledgeCards");
+/* Load saved cards from browser */
+const savedCards = localStorage.getItem("photoMomentsCards");
 
 if (savedCards) {
-  const parsedCards = JSON.parse(savedCards);
   cards.length = 0;
-  cards.push(...parsedCards);
+  cards.push(...JSON.parse(savedCards));
 }
 
-/* =========================================
+/* =========================
    2. DOM ELEMENTS
-========================================= */
+========================= */
 
 const cardsContainer = document.getElementById("cardsContainer");
 const searchInput = document.getElementById("searchInput");
@@ -53,64 +49,34 @@ const cardModal = document.getElementById("cardModal");
 const closeModalBtn = document.getElementById("closeModalBtn");
 const cardForm = document.getElementById("cardForm");
 
-const categoryInput = document.getElementById("categoryInput");
-const titleInput = document.getElementById("titleInput");
-const contentInput = document.getElementById("contentInput");
 const imageInput = document.getElementById("imageInput");
-const modalTitle = document.getElementById("modalTitle");
+const titleInput = document.getElementById("titleInput");
+const locationInput = document.getElementById("locationInput");
+const contentInput = document.getElementById("contentInput");
+const settingsInput = document.getElementById("settingsInput");
+const learningInput = document.getElementById("learningInput");
 
+const modalTitle = document.getElementById("modalTitle");
 const collectionButtons = document.querySelectorAll(".collection-btn");
 
-/* =========================================
+/* =========================
    3. APP STATE
-========================================= */
+========================= */
 
+let activeCollection = "moments";
 let editingCardId = null;
-let openedCardId = null;
-let activeCollection = "photos";
 let deferredPrompt = null;
 
-/* =========================================
-   4. HELPER FUNCTIONS
-========================================= */
+/* =========================
+   4. HELPERS
+========================= */
 
+/* Save cards permanently in browser */
 function saveCards() {
-  localStorage.setItem("knowledgeCards", JSON.stringify(cards));
+  localStorage.setItem("photoMomentsCards", JSON.stringify(cards));
 }
 
-function getCardsByActiveCollection() {
-  return cards.filter((card) => card.collection === activeCollection);
-}
-
-function sortCards(data) {
-  const mode = sortSelect.value;
-  const sorted = [...data];
-
-  if (mode === "az") {
-    sorted.sort((a, b) =>
-      a.title.localeCompare(b.title, undefined, { sensitivity: "base" })
-    );
-  }
-
-  if (mode === "za") {
-    sorted.sort((a, b) =>
-      b.title.localeCompare(a.title, undefined, { sensitivity: "base" })
-    );
-  }
-
-  if (mode === "newest") {
-    sorted.sort((a, b) => b.id - a.id);
-  }
-
-  if (mode === "category") {
-    sorted.sort((a, b) =>
-      a.category.localeCompare(b.category, undefined, { sensitivity: "base" })
-    );
-  }
-
-  return sorted;
-}
-
+/* Convert uploaded photo to Base64 for localStorage */
 function convertImageToBase64(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -123,65 +89,97 @@ function convertImageToBase64(file) {
   });
 }
 
-/* =========================================
-   5. RENDER FUNCTIONS
-========================================= */
+/* Get cards from the selected collection */
+function getActiveCollectionCards() {
+  return cards.filter((card) => card.collection === activeCollection);
+}
 
-function renderCards(data = []) {
-  const sortedData = sortCards(data);
+/* Sort cards */
+function sortCards(data) {
+  const sorted = [...data];
+  const mode = sortSelect.value;
+
+  if (mode === "newest") {
+    sorted.sort((a, b) => b.id - a.id);
+  }
+
+  if (mode === "az") {
+    sorted.sort((a, b) => a.title.localeCompare(b.title));
+  }
+
+  if (mode === "za") {
+    sorted.sort((a, b) => b.title.localeCompare(a.title));
+  }
+
+  if (mode === "location") {
+    sorted.sort((a, b) => (a.location || "").localeCompare(b.location || ""));
+  }
+
+  return sorted;
+}
+
+/* =========================
+   5. RENDER
+========================= */
+
+function renderCards(data) {
+  const sortedCards = sortCards(data);
 
   cardsContainer.innerHTML = "";
 
-  if (sortedData.length === 0) {
+  if (sortedCards.length === 0) {
     cardsContainer.innerHTML = `
       <div class="empty-state">
-        <h3>No cards found</h3>
-        <p>Try a different search term.</p>
+        <h3>No moments found</h3>
+        <p>Add your first photo moment.</p>
       </div>
     `;
     return;
   }
 
-  sortedData.forEach((card) => {
+  sortedCards.forEach((card) => {
     const cardElement = document.createElement("article");
-    const isOpen = openedCardId === card.id;
-
-    cardElement.classList.add("card");
-    cardElement.dataset.id = card.id;
+    cardElement.classList.add("photo-card");
 
     cardElement.innerHTML = `
-      <div class="card-top">
-        <button type="button" class="card-toggle">
-          <span class="card-category">${card.category}</span>
-          <span class="card-title">${card.title}</span>
-        </button>
-      </div>
+      ${card.image
+        ? `<img src="${card.image}" alt="${card.title}" class="photo-image">`
+        : `<div class="photo-placeholder">📸</div>`
+      }
 
-      <div class="card-body ${isOpen ? "" : "hidden-content"}">
-        ${card.image ? `<img src="${card.image}" alt="${card.title}" class="card-image">` : ""}
+      <div class="photo-info">
+        <div class="photo-meta">
+          <span>${card.location || "No location"}</span>
+          <span>${card.collection === "learning" ? "Learning" : "Moment"}</span>
+        </div>
 
-        <p class="card-content">${card.content}</p>
+        <h2 class="photo-title">${card.title}</h2>
 
-        <div class="card-actions">
-          <button type="button" class="edit-btn">Edit</button>
-          <button type="button" class="delete-btn">Delete</button>
+        <p class="photo-notes">${card.content}</p>
+
+        ${card.settings ? `
+          <div class="info-box">
+            <strong>⚙️ Photo Settings</strong>
+            <p>${card.settings}</p>
+          </div>
+        ` : ""}
+
+        ${card.learning ? `
+          <div class="info-box">
+            <strong>🧠 Learning Note</strong>
+            <p>${card.learning}</p>
+          </div>
+        ` : ""}
+
+        <div class="photo-actions">
+          <button class="edit-btn" type="button">Edit</button>
+          <button class="delete-btn" type="button">Delete</button>
         </div>
       </div>
     `;
 
-    const toggleBtn = cardElement.querySelector(".card-toggle");
     const editBtn = cardElement.querySelector(".edit-btn");
     const deleteBtn = cardElement.querySelector(".delete-btn");
-
-    toggleBtn.addEventListener("click", () => {
-      if (openedCardId === card.id) {
-        openedCardId = null;
-      } else {
-        openedCardId = card.id;
-      }
-
-      applyFiltersAndRender();
-    });
 
     editBtn.addEventListener("click", () => {
       editCard(card.id);
@@ -195,44 +193,37 @@ function renderCards(data = []) {
   });
 }
 
-/* =========================================
-   6. FILTER / SEARCH LOGIC
-========================================= */
+/* =========================
+   6. FILTER + SEARCH
+========================= */
 
 function applyFiltersAndRender() {
   const searchTerm = searchInput.value.trim().toLowerCase();
 
-  let filteredCards = getCardsByActiveCollection();
+  let filteredCards = getActiveCollectionCards();
 
   if (searchTerm) {
     filteredCards = filteredCards.filter((card) => {
       return (
         card.title.toLowerCase().includes(searchTerm) ||
-        card.category.toLowerCase().includes(searchTerm) ||
-        card.content.toLowerCase().includes(searchTerm)
+        (card.location || "").toLowerCase().includes(searchTerm) ||
+        card.content.toLowerCase().includes(searchTerm) ||
+        (card.settings || "").toLowerCase().includes(searchTerm) ||
+        (card.learning || "").toLowerCase().includes(searchTerm)
       );
     });
-  }
-
-  if (filteredCards.length === 1) {
-    openedCardId = filteredCards[0].id;
-  } else if (!filteredCards.some((card) => card.id === openedCardId)) {
-    openedCardId = null;
   }
 
   renderCards(filteredCards);
 }
 
-/* =========================================
-   7. MODAL FUNCTIONS
-========================================= */
+/* =========================
+   7. MODAL
+========================= */
 
 function openModal() {
-  if (editingCardId === null) {
-    modalTitle.textContent = "Add New Card";
-  } else {
-    modalTitle.textContent = "Edit Card";
-  }
+  modalTitle.textContent =
+    editingCardId === null ? "Add Photo Moment" : "Edit Photo Moment";
 
   cardModal.classList.remove("hidden");
 }
@@ -244,37 +235,9 @@ function closeModal() {
   editingCardId = null;
 }
 
-/* =========================================
-   8. CRUD FUNCTIONS
-========================================= */
-
-function deleteCard(id) {
-  const index = cards.findIndex((card) => card.id === id);
-
-  if (index !== -1) {
-    cards.splice(index, 1);
-
-    if (openedCardId === id) {
-      openedCardId = null;
-    }
-
-    saveCards();
-    applyFiltersAndRender();
-  }
-}
-
-function editCard(id) {
-  const cardToEdit = cards.find((card) => card.id === id);
-
-  if (!cardToEdit) return;
-
-  categoryInput.value = cardToEdit.category;
-  titleInput.value = cardToEdit.title;
-  contentInput.value = cardToEdit.content;
-
-  editingCardId = id;
-  openModal();
-}
+/* =========================
+   8. CRUD
+========================= */
 
 async function createCard() {
   let imageData = null;
@@ -286,14 +249,15 @@ async function createCard() {
   const newCard = {
     id: Date.now(),
     collection: activeCollection,
-    category: categoryInput.value.trim(),
     title: titleInput.value.trim(),
+    location: locationInput.value.trim(),
     content: contentInput.value.trim(),
+    settings: settingsInput.value.trim(),
+    learning: learningInput.value.trim(),
     image: imageData
   };
 
   cards.push(newCard);
-  openedCardId = newCard.id;
   saveCards();
 }
 
@@ -302,21 +266,48 @@ async function updateCard() {
 
   if (!cardToUpdate) return;
 
-  cardToUpdate.category = categoryInput.value.trim();
   cardToUpdate.title = titleInput.value.trim();
+  cardToUpdate.location = locationInput.value.trim();
   cardToUpdate.content = contentInput.value.trim();
+  cardToUpdate.settings = settingsInput.value.trim();
+  cardToUpdate.learning = learningInput.value.trim();
 
   if (imageInput.files[0]) {
     cardToUpdate.image = await convertImageToBase64(imageInput.files[0]);
   }
 
-  openedCardId = cardToUpdate.id;
   saveCards();
 }
 
-/* =========================================
-   9. EVENT LISTENERS
-========================================= */
+function editCard(id) {
+  const cardToEdit = cards.find((card) => card.id === id);
+
+  if (!cardToEdit) return;
+
+  editingCardId = id;
+
+  titleInput.value = cardToEdit.title;
+  locationInput.value = cardToEdit.location || "";
+  contentInput.value = cardToEdit.content;
+  settingsInput.value = cardToEdit.settings || "";
+  learningInput.value = cardToEdit.learning || "";
+
+  openModal();
+}
+
+function deleteCard(id) {
+  const index = cards.findIndex((card) => card.id === id);
+
+  if (index !== -1) {
+    cards.splice(index, 1);
+    saveCards();
+    applyFiltersAndRender();
+  }
+}
+
+/* =========================
+   9. EVENTS
+========================= */
 
 addCardBtn.addEventListener("click", () => {
   editingCardId = null;
@@ -340,18 +331,12 @@ cardForm.addEventListener("submit", async (event) => {
   applyFiltersAndRender();
 });
 
-searchInput.addEventListener("input", () => {
-  applyFiltersAndRender();
-});
-
-sortSelect.addEventListener("change", () => {
-  applyFiltersAndRender();
-});
+searchInput.addEventListener("input", applyFiltersAndRender);
+sortSelect.addEventListener("change", applyFiltersAndRender);
 
 collectionButtons.forEach((button) => {
   button.addEventListener("click", () => {
     activeCollection = button.dataset.collection;
-    openedCardId = null;
     searchInput.value = "";
 
     collectionButtons.forEach((btn) => {
@@ -364,14 +349,14 @@ collectionButtons.forEach((button) => {
   });
 });
 
-/* =========================================
-   10. PWA INSTALL BUTTON
-========================================= */
+/* =========================
+   10. PWA INSTALL
+========================= */
 
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
   deferredPrompt = event;
-  installBtn.style.display = "inline-block";
+  installBtn.style.display = "block";
 });
 
 installBtn.addEventListener("click", async () => {
@@ -379,25 +364,21 @@ installBtn.addEventListener("click", async () => {
 
   deferredPrompt.prompt();
 
-  const { outcome } = await deferredPrompt.userChoice;
-
-  if (outcome === "accepted") {
-    console.log("App installed");
-  }
+  await deferredPrompt.userChoice;
 
   deferredPrompt = null;
   installBtn.style.display = "none";
 });
 
-/* =========================================
-   11. INITIAL START
-========================================= */
+/* =========================
+   11. START APP
+========================= */
 
 applyFiltersAndRender();
 
-/* =========================================
+/* =========================
    12. SERVICE WORKER
-========================================= */
+========================= */
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
