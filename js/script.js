@@ -26,7 +26,7 @@ const cards = [
   }
 ];
 
-/* Load saved cards from browser */
+/* Load saved cards from localStorage */
 const savedCards = localStorage.getItem("photoMomentsCards");
 
 if (savedCards) {
@@ -68,15 +68,15 @@ let editingCardId = null;
 let deferredPrompt = null;
 
 /* =========================
-   4. HELPERS
+   4. HELPER FUNCTIONS
 ========================= */
 
-/* Save cards permanently in browser */
+/* Save all cards permanently in browser */
 function saveCards() {
   localStorage.setItem("photoMomentsCards", JSON.stringify(cards));
 }
 
-/* Convert uploaded photo to Base64 for localStorage */
+/* Convert uploaded photo to Base64 */
 function convertImageToBase64(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -89,12 +89,12 @@ function convertImageToBase64(file) {
   });
 }
 
-/* Get cards from the selected collection */
+/* Return cards from selected collection */
 function getActiveCollectionCards() {
   return cards.filter((card) => card.collection === activeCollection);
 }
 
-/* Sort cards */
+/* Sort cards based on dropdown */
 function sortCards(data) {
   const sorted = [...data];
   const mode = sortSelect.value;
@@ -119,7 +119,7 @@ function sortCards(data) {
 }
 
 /* =========================
-   5. RENDER
+   5. RENDER PHOTO GRID
 ========================= */
 
 function renderCards(data) {
@@ -139,54 +139,23 @@ function renderCards(data) {
 
   sortedCards.forEach((card) => {
     const cardElement = document.createElement("article");
-    cardElement.classList.add("photo-card");
+    cardElement.classList.add("grid-card");
 
     cardElement.innerHTML = `
       ${card.image
-        ? `<img src="${card.image}" alt="${card.title}" class="photo-image">`
-        : `<div class="photo-placeholder">📸</div>`
+        ? `<img src="${card.image}" alt="${card.title}" class="grid-image">`
+        : `<div class="grid-placeholder">📸</div>`
       }
 
-      <div class="photo-info">
-        <div class="photo-meta">
-          <span>${card.location || "No location"}</span>
-          <span>${card.collection === "learning" ? "Learning" : "Moment"}</span>
-        </div>
-
-        <h2 class="photo-title">${card.title}</h2>
-
-        <p class="photo-notes">${card.content}</p>
-
-        ${card.settings ? `
-          <div class="info-box">
-            <strong>⚙️ Photo Settings</strong>
-            <p>${card.settings}</p>
-          </div>
-        ` : ""}
-
-        ${card.learning ? `
-          <div class="info-box">
-            <strong>🧠 Learning Note</strong>
-            <p>${card.learning}</p>
-          </div>
-        ` : ""}
-
-        <div class="photo-actions">
-          <button class="edit-btn" type="button">Edit</button>
-          <button class="delete-btn" type="button">Delete</button>
-        </div>
+      <div class="grid-overlay">
+        <h3>${card.title}</h3>
+        <p>${card.location || "No location"}</p>
       </div>
     `;
 
-    const editBtn = cardElement.querySelector(".edit-btn");
-    const deleteBtn = cardElement.querySelector(".delete-btn");
-
-    editBtn.addEventListener("click", () => {
-      editCard(card.id);
-    });
-
-    deleteBtn.addEventListener("click", () => {
-      deleteCard(card.id);
+    /* Click on photo opens detail modal */
+    cardElement.addEventListener("click", () => {
+      openDetailView(card);
     });
 
     cardsContainer.appendChild(cardElement);
@@ -194,7 +163,7 @@ function renderCards(data) {
 }
 
 /* =========================
-   6. FILTER + SEARCH
+   6. SEARCH + FILTER
 ========================= */
 
 function applyFiltersAndRender() {
@@ -218,25 +187,98 @@ function applyFiltersAndRender() {
 }
 
 /* =========================
-   7. MODAL
+   7. MODAL MODES
 ========================= */
 
-function openModal() {
+/* Open form mode for add/edit */
+function openFormModal() {
+  removeDetailView();
+
   modalTitle.textContent =
     editingCardId === null ? "Add Photo Moment" : "Edit Photo Moment";
 
+  cardForm.style.display = "block";
   cardModal.classList.remove("hidden");
 }
 
+/* Close modal and reset everything */
 function closeModal() {
   cardModal.classList.add("hidden");
   cardForm.reset();
   imageInput.value = "";
   editingCardId = null;
+  removeDetailView();
+  cardForm.style.display = "block";
+}
+
+/* Remove detail view if it exists */
+function removeDetailView() {
+  const detailView = document.getElementById("detailView");
+
+  if (detailView) {
+    detailView.remove();
+  }
+}
+
+/* Open detail view when user taps a photo */
+function openDetailView(card) {
+  removeDetailView();
+
+  modalTitle.textContent = card.title;
+  cardForm.style.display = "none";
+
+  const detailHTML = `
+    <div class="detail-view" id="detailView">
+      ${card.image
+        ? `<img src="${card.image}" alt="${card.title}" class="detail-image">`
+        : `<div class="detail-placeholder">📸</div>`
+      }
+
+      <div class="detail-meta">
+        <span>${card.location || "No location"}</span>
+        <span>${card.collection === "learning" ? "Learning" : "Moment"}</span>
+      </div>
+
+      <p class="detail-notes">${card.content}</p>
+
+      ${card.settings ? `
+        <div class="info-box">
+          <strong>⚙️ Photo Settings</strong>
+          <p>${card.settings}</p>
+        </div>
+      ` : ""}
+
+      ${card.learning ? `
+        <div class="info-box">
+          <strong>🧠 Learning Note</strong>
+          <p>${card.learning}</p>
+        </div>
+      ` : ""}
+
+      <div class="photo-actions">
+        <button type="button" class="edit-btn" id="detailEditBtn">Edit</button>
+        <button type="button" class="delete-btn" id="detailDeleteBtn">Delete</button>
+      </div>
+    </div>
+  `;
+
+  modalTitle.insertAdjacentHTML("afterend", detailHTML);
+
+  document.getElementById("detailEditBtn").addEventListener("click", () => {
+    closeModal();
+    editCard(card.id);
+  });
+
+  document.getElementById("detailDeleteBtn").addEventListener("click", () => {
+    deleteCard(card.id);
+    closeModal();
+  });
+
+  cardModal.classList.remove("hidden");
 }
 
 /* =========================
-   8. CRUD
+   8. CRUD FUNCTIONS
 ========================= */
 
 async function createCard() {
@@ -292,7 +334,7 @@ function editCard(id) {
   settingsInput.value = cardToEdit.settings || "";
   learningInput.value = cardToEdit.learning || "";
 
-  openModal();
+  openFormModal();
 }
 
 function deleteCard(id) {
@@ -306,14 +348,14 @@ function deleteCard(id) {
 }
 
 /* =========================
-   9. EVENTS
+   9. EVENT LISTENERS
 ========================= */
 
 addCardBtn.addEventListener("click", () => {
   editingCardId = null;
   cardForm.reset();
   imageInput.value = "";
-  openModal();
+  openFormModal();
 });
 
 closeModalBtn.addEventListener("click", closeModal);
@@ -350,7 +392,7 @@ collectionButtons.forEach((button) => {
 });
 
 /* =========================
-   10. PWA INSTALL
+   10. PWA INSTALL BUTTON
 ========================= */
 
 window.addEventListener("beforeinstallprompt", (event) => {
@@ -363,7 +405,6 @@ installBtn.addEventListener("click", async () => {
   if (!deferredPrompt) return;
 
   deferredPrompt.prompt();
-
   await deferredPrompt.userChoice;
 
   deferredPrompt = null;
