@@ -1,131 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <!-- Basic browser settings -->
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <!-- Basic browser settings -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- App title -->
-  <title>Photo Moments App</title>
+    <!-- App title -->
+    <title>Photo Moments App</title>
 
-  <!-- CSS file -->
-  <link rel="stylesheet" href="css/style.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css" />
 
-  <!-- PWA files -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#111827">
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#111827" />
 
-  <!-- App icons -->
-  <link rel="icon" href="icons/icon-192.png" type="image/png">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-</head>
+    <!-- Icons -->
+    <link rel="icon" href="icons/icon-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  </head>
 
-<body>
-  <!-- Header / top app area -->
-  <header class="app-header">
-    <h1>Photo Moments</h1>
-    <p>Memories, settings and learning notes</p>
+  <body>
+    <!-- HEADER -->
+    <header class="app-header">
+      <h1>Photo Moments</h1>
+      <p>Memories, settings and learning notes</p>
 
-    <!-- Search input -->
-    <input
-      type="text"
-      id="searchInput"
-      placeholder="Search moments..."
-    >
+      <!-- Search -->
+      <input type="text" id="searchInput" placeholder="Search moments..." />
 
-    <!-- Sorting and install button -->
-    <div class="header-actions">
-      <select id="sortSelect">
-        <option value="newest">Newest</option>
-        <option value="az">Title A–Z</option>
-        <option value="za">Title Z–A</option>
-        <option value="location">Location</option>
-      </select>
+      <!-- Sort + Install -->
+      <div class="header-actions">
+        <select id="sortSelect">
+          <option value="newest">Newest</option>
+          <option value="az">Title A–Z</option>
+          <option value="za">Title Z–A</option>
+          <option value="location">Location</option>
+        </select>
 
-      <button id="installBtn" class="install-btn" style="display: none;">
-        Install App
-      </button>
-    </div>
-  </header>
-
-  <!-- Collection buttons -->
-  <section class="collections-bar">
-    <button class="collection-btn active" data-collection="moments">
-      📸 Photo Moments
-    </button>
-
-    <button class="collection-btn" data-collection="learning">
-      🧠 Learning Cards
-    </button>
-  </section>
-
-  <!-- Photo grid will be created by JavaScript here -->
-  <main class="cards-container" id="cardsContainer"></main>
-
-  <!-- Floating add button -->
-  <button id="addCardBtn" class="fab">+</button>
-
-  <!-- Modal: used for Add/Edit and Detail View -->
-  <div class="modal hidden" id="cardModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modalTitle">Add Photo Moment</h2>
-
-        <button type="button" class="close-btn" id="closeModalBtn">
-          ×
+        <button id="installBtn" class="install-btn" style="display: none">
+          Install App
         </button>
       </div>
+    </header>
 
-      <!-- Detail view will be inserted here by JavaScript -->
+    <!-- COLLECTION FILTERS -->
+    <section class="collections-bar">
+      <button class="collection-btn active" data-collection="moments">
+        📸 Photo Moments
+      </button>
 
-      <!-- Form for create/edit -->
-      <form id="cardForm">
-        <div class="form-group">
-          <label for="imageInput">Photo</label>
-          <input type="file" id="imageInput" accept="image/*">
+      <button class="collection-btn" data-collection="learning">
+        🧠 Learning Cards
+      </button>
+    </section>
+
+    <!-- PHOTO GRID -->
+    <main class="cards-container" id="cardsContainer"></main>
+
+    <!-- FLOATING ADD BUTTON -->
+    <button id="addCardBtn" class="fab" type="button">+</button>
+
+    <!-- MODAL -->
+    <div class="modal hidden" id="cardModal">
+      <div class="modal-content">
+        <!-- Modal header: title + close button -->
+        <div class="modal-header">
+          <h2 id="modalTitle">Add Photo Moment</h2>
+
+          <button type="button" class="close-btn" id="closeModalBtn">×</button>
         </div>
 
-        <div class="form-group">
-          <label for="titleInput">Title</label>
-          <input type="text" id="titleInput" required>
-        </div>
+        <!-- Detail view will be inserted here by JavaScript -->
 
-        <div class="form-group">
-          <label for="locationInput">Location</label>
-          <input type="text" id="locationInput" placeholder="Frankfurt, Tromsø, Verona...">
-        </div>
+        <!-- FORM: used for create and edit -->
+        <form id="cardForm">
+          <div class="form-group">
+            <label for="imageInput">Photo</label>
+            <input type="file" id="imageInput" accept="image/*" />
+          </div>
 
-        <div class="form-group">
-          <label for="contentInput">Moment Notes</label>
-          <textarea id="contentInput" rows="4" required></textarea>
-        </div>
+          <div class="form-group">
+            <label for="titleInput">Title</label>
+            <input type="text" id="titleInput" required />
+          </div>
 
-        <div class="form-group">
-          <label for="settingsInput">Photo Settings</label>
-          <textarea
-            id="settingsInput"
-            rows="3"
-            placeholder="Nikon Z50 · 40mm · f/2.8 · 1/250s · ISO 200"
-          ></textarea>
-        </div>
+          <div class="form-group">
+            <label for="locationInput">Location</label>
+            <input
+              type="text"
+              id="locationInput"
+              placeholder="Tromsø, Frankfurt, Verona..."
+            />
+          </div>
 
-        <div class="form-group">
-          <label for="learningInput">Learning Note</label>
-          <textarea
-            id="learningInput"
-            rows="3"
-            placeholder="What did this photo teach you?"
-          ></textarea>
-        </div>
+          <div class="form-group">
+            <label for="contentInput">Moment Notes</label>
+            <textarea id="contentInput" rows="4" required></textarea>
+          </div>
 
-        <button type="submit" class="submit-btn">
-          Save Moment
-        </button>
-      </form>
+          <div class="form-group">
+            <label for="settingsInput">Photo Settings</label>
+            <textarea
+              id="settingsInput"
+              rows="3"
+              placeholder="Nikon Z50 · 40mm · f/2.8 · 1/250s · ISO 200"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="learningInput">Learning Note</label>
+            <textarea
+              id="learningInput"
+              rows="3"
+              placeholder="What did this photo teach you?"
+            ></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn">Save Moment</button>
+        </form>
+      </div>
     </div>
-  </div>
 
-  <!-- JavaScript file -->
-  <script src="js/script.js"></script>
-</body>
+    <!-- JavaScript -->
+    <script src="js/script.js"></script>
+  </body>
 </html>

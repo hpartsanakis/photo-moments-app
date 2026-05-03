@@ -1,6 +1,8 @@
 /* =========================
    1. DATA
-   Default cards for first app load
+   Default cards for first app load.
+   If localStorage has saved cards,
+   these default cards will be replaced.
 ========================= */
 
 const cards = [
@@ -11,8 +13,9 @@ const cards = [
     location: "Frankfurt am Main",
     content: "Perfect reflections after rain near the river.",
     settings: "Nikon Z50 · 40mm · f/2.8 · 1/250s · ISO 200",
-    learning: "Blue hour gives softer contrast. Reflections become stronger after rain.",
-    image: null
+    learning:
+      "Blue hour gives softer contrast. Reflections become stronger after rain.",
+    image: null,
   },
   {
     id: 2,
@@ -22,11 +25,11 @@ const cards = [
     content: "Testing how shutter speed affects movement.",
     settings: "1/1000s freezes action · 1/30s creates motion blur",
     learning: "Fast shutter freezes movement. Slow shutter shows motion.",
-    image: null
-  }
+    image: null,
+  },
 ];
 
-/* Load saved cards from localStorage */
+/* Load saved cards from browser */
 const savedCards = localStorage.getItem("photoMomentsCards");
 
 if (savedCards) {
@@ -36,6 +39,7 @@ if (savedCards) {
 
 /* =========================
    2. DOM ELEMENTS
+   These are HTML elements we control with JS.
 ========================= */
 
 const cardsContainer = document.getElementById("cardsContainer");
@@ -71,7 +75,7 @@ let deferredPrompt = null;
    4. HELPER FUNCTIONS
 ========================= */
 
-/* Save all cards permanently in browser */
+/* Save cards permanently in browser */
 function saveCards() {
   localStorage.setItem("photoMomentsCards", JSON.stringify(cards));
 }
@@ -89,7 +93,7 @@ function convertImageToBase64(file) {
   });
 }
 
-/* Return cards from selected collection */
+/* Get only cards from the active collection */
 function getActiveCollectionCards() {
   return cards.filter((card) => card.collection === activeCollection);
 }
@@ -142,9 +146,10 @@ function renderCards(data) {
     cardElement.classList.add("grid-card");
 
     cardElement.innerHTML = `
-      ${card.image
-        ? `<img src="${card.image}" alt="${card.title}" class="grid-image">`
-        : `<div class="grid-placeholder">📸</div>`
+      ${
+        card.image
+          ? `<img src="${card.image}" alt="${card.title}" class="grid-image">`
+          : `<div class="grid-placeholder">📸</div>`
       }
 
       <div class="grid-overlay">
@@ -153,7 +158,7 @@ function renderCards(data) {
       </div>
     `;
 
-    /* Click on photo opens detail modal */
+    /* Click photo tile -> open detail modal */
     cardElement.addEventListener("click", () => {
       openDetailView(card);
     });
@@ -187,29 +192,8 @@ function applyFiltersAndRender() {
 }
 
 /* =========================
-   7. MODAL MODES
+   7. MODAL CONTROL
 ========================= */
-
-/* Open form mode for add/edit */
-function openFormModal() {
-  removeDetailView();
-
-  modalTitle.textContent =
-    editingCardId === null ? "Add Photo Moment" : "Edit Photo Moment";
-
-  cardForm.style.display = "block";
-  cardModal.classList.remove("hidden");
-}
-
-/* Close modal and reset everything */
-function closeModal() {
-  cardModal.classList.add("hidden");
-  cardForm.reset();
-  imageInput.value = "";
-  editingCardId = null;
-  removeDetailView();
-  cardForm.style.display = "block";
-}
 
 /* Remove detail view if it exists */
 function removeDetailView() {
@@ -220,41 +204,88 @@ function removeDetailView() {
   }
 }
 
-/* Open detail view when user taps a photo */
+/* Open modal in form mode */
+function openFormModal() {
+  removeDetailView();
+
+  modalTitle.textContent =
+    editingCardId === null ? "Add Photo Moment" : "Edit Photo Moment";
+
+  cardForm.style.display = "block";
+  cardModal.classList.remove("hidden");
+}
+
+/* Close modal and reset state */
+function closeModal() {
+  cardModal.classList.add("hidden");
+
+  removeDetailView();
+
+  modalTitle.textContent = "Add Photo Moment";
+  cardForm.style.display = "block";
+
+  cardForm.reset();
+  imageInput.value = "";
+  editingCardId = null;
+}
+
+/* Open modal in detail view mode */
 function openDetailView(card) {
   removeDetailView();
 
-  modalTitle.textContent = card.title;
+  /* Hide form because we show details */
   cardForm.style.display = "none";
+
+  /* Keep modal header empty except close button */
+  modalTitle.textContent = "";
 
   const detailHTML = `
     <div class="detail-view" id="detailView">
-      ${card.image
-        ? `<img src="${card.image}" alt="${card.title}" class="detail-image">`
-        : `<div class="detail-placeholder">📸</div>`
+
+      <!-- Title ABOVE photo -->
+      <h2 class="detail-title">${card.title}</h2>
+
+      <!-- Photo -->
+      ${
+        card.image
+          ? `<img src="${card.image}" alt="${card.title}" class="detail-image">`
+          : `<div class="detail-placeholder">📸</div>`
       }
 
+      <!-- Meta information -->
       <div class="detail-meta">
         <span>${card.location || "No location"}</span>
         <span>${card.collection === "learning" ? "Learning" : "Moment"}</span>
       </div>
 
+      <!-- Story / notes -->
       <p class="detail-notes">${card.content}</p>
 
-      ${card.settings ? `
-        <div class="info-box">
-          <strong>⚙️ Photo Settings</strong>
-          <p>${card.settings}</p>
-        </div>
-      ` : ""}
+      <!-- Photo settings -->
+      ${
+        card.settings
+          ? `
+            <div class="info-box">
+              <strong>⚙️ Photo Settings</strong>
+              <p>${card.settings}</p>
+            </div>
+          `
+          : ""
+      }
 
-      ${card.learning ? `
-        <div class="info-box">
-          <strong>🧠 Learning Note</strong>
-          <p>${card.learning}</p>
-        </div>
-      ` : ""}
+      <!-- Learning note -->
+      ${
+        card.learning
+          ? `
+            <div class="info-box">
+              <strong>🧠 Learning Note</strong>
+              <p>${card.learning}</p>
+            </div>
+          `
+          : ""
+      }
 
+      <!-- Actions -->
       <div class="photo-actions">
         <button type="button" class="edit-btn" id="detailEditBtn">Edit</button>
         <button type="button" class="delete-btn" id="detailDeleteBtn">Delete</button>
@@ -262,13 +293,22 @@ function openDetailView(card) {
     </div>
   `;
 
-  modalTitle.insertAdjacentHTML("afterend", detailHTML);
+  /*
+    IMPORTANT:
+    Insert detail view AFTER modal-header.
+    This makes the title appear above the photo,
+    not beside it.
+  */
+  const modalHeader = document.querySelector(".modal-header");
+  modalHeader.insertAdjacentHTML("afterend", detailHTML);
 
+  /* Edit from detail view */
   document.getElementById("detailEditBtn").addEventListener("click", () => {
     closeModal();
     editCard(card.id);
   });
 
+  /* Delete from detail view */
   document.getElementById("detailDeleteBtn").addEventListener("click", () => {
     deleteCard(card.id);
     closeModal();
@@ -281,6 +321,7 @@ function openDetailView(card) {
    8. CRUD FUNCTIONS
 ========================= */
 
+/* Create new card */
 async function createCard() {
   let imageData = null;
 
@@ -296,13 +337,14 @@ async function createCard() {
     content: contentInput.value.trim(),
     settings: settingsInput.value.trim(),
     learning: learningInput.value.trim(),
-    image: imageData
+    image: imageData,
   };
 
   cards.push(newCard);
   saveCards();
 }
 
+/* Update existing card */
 async function updateCard() {
   const cardToUpdate = cards.find((card) => card.id === editingCardId);
 
@@ -314,6 +356,7 @@ async function updateCard() {
   cardToUpdate.settings = settingsInput.value.trim();
   cardToUpdate.learning = learningInput.value.trim();
 
+  /* If new image selected, replace old image */
   if (imageInput.files[0]) {
     cardToUpdate.image = await convertImageToBase64(imageInput.files[0]);
   }
@@ -321,6 +364,7 @@ async function updateCard() {
   saveCards();
 }
 
+/* Prepare edit mode */
 function editCard(id) {
   const cardToEdit = cards.find((card) => card.id === id);
 
@@ -337,6 +381,7 @@ function editCard(id) {
   openFormModal();
 }
 
+/* Delete card */
 function deleteCard(id) {
   const index = cards.findIndex((card) => card.id === id);
 
@@ -351,6 +396,7 @@ function deleteCard(id) {
    9. EVENT LISTENERS
 ========================= */
 
+/* Add button */
 addCardBtn.addEventListener("click", () => {
   editingCardId = null;
   cardForm.reset();
@@ -358,8 +404,10 @@ addCardBtn.addEventListener("click", () => {
   openFormModal();
 });
 
+/* Close modal */
 closeModalBtn.addEventListener("click", closeModal);
 
+/* Submit form */
 cardForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -373,9 +421,13 @@ cardForm.addEventListener("submit", async (event) => {
   applyFiltersAndRender();
 });
 
+/* Search */
 searchInput.addEventListener("input", applyFiltersAndRender);
+
+/* Sort */
 sortSelect.addEventListener("change", applyFiltersAndRender);
 
+/* Collection buttons */
 collectionButtons.forEach((button) => {
   button.addEventListener("click", () => {
     activeCollection = button.dataset.collection;
@@ -397,6 +449,7 @@ collectionButtons.forEach((button) => {
 
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
+
   deferredPrompt = event;
   installBtn.style.display = "block";
 });
@@ -423,7 +476,8 @@ applyFiltersAndRender();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js")
+    navigator.serviceWorker
+      .register("./service-worker.js")
       .then(() => {
         console.log("Service Worker registered");
       })
