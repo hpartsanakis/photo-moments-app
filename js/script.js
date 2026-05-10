@@ -2,17 +2,15 @@
 // STATE
 // =========================
 
-// Main app data
 let moments = [];
 
-// LocalStorage key
 const STORAGE_KEY = "photo-moments-app-data";
 
 // =========================
 // SELECTORS
 // =========================
 
-// Form elements
+// Form
 const momentForm = document.getElementById("moment-form");
 const titleInput = document.getElementById("title-input");
 const locationInput = document.getElementById("location-input");
@@ -21,18 +19,19 @@ const categoryInput = document.getElementById("category-input");
 const lensInput = document.getElementById("lens-input");
 const notesInput = document.getElementById("notes-input");
 
-//Search elements
-const searchInput = document.getElementById("search-input");
-const filterCategory = document.getElementById("filter-category");
-
-// Gallery elements
+// Gallery
 const galleryGrid = document.getElementById("gallery-grid");
 const momentCount = document.getElementById("moment-count");
 const emptyState = document.getElementById("empty-state");
 
-// Fullscreen viewer elements
+// Search / Filter
+const searchInput = document.getElementById("search-input");
+const filterCategory = document.getElementById("filter-category");
+
+// Viewer
 const photoViewer = document.getElementById("photo-viewer");
 const viewerCloseBtn = document.getElementById("viewer-close-btn");
+
 const viewerImage = document.getElementById("viewer-image");
 const viewerLocation = document.getElementById("viewer-location");
 const viewerTitle = document.getElementById("viewer-title");
@@ -47,18 +46,17 @@ const navItems = document.querySelectorAll(".nav-item");
 // SAMPLE DATA
 // =========================
 
-// These demo moments appear only if localStorage is empty
 const sampleMoments = [
   {
     id: crypto.randomUUID(),
     title: "Aurora over Tromsø Fjord",
-    location: "Tromso • Norway",
+    location: "Tromsø • Norway",
     image:
       "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1200&q=80",
     category: "Aurora",
     lens: "Viltrox 13mm f/1.4",
     notes: "M Mode • f/1.8 • ISO 1600 • 1s • WB 4000K • Tripod",
-    favorite: false,
+    favorite: true,
   },
   {
     id: crypto.randomUUID(),
@@ -69,6 +67,7 @@ const sampleMoments = [
     category: "Snow",
     lens: "DX 16-50mm @ 40mm",
     notes: "A Mode • f/5.6 • Auto ISO • 1/250s • -0.7 EV",
+    favorite: false,
   },
   {
     id: crypto.randomUUID(),
@@ -79,7 +78,7 @@ const sampleMoments = [
     category: "Reflection",
     lens: "DX 12-28mm",
     notes: "M Mode • f/8 • ISO 100 • 6s • WB 3800K • Tripod",
-    favorite: false,
+    favorite: true,
   },
   {
     id: crypto.randomUUID(),
@@ -90,6 +89,7 @@ const sampleMoments = [
     category: "Rain",
     lens: "DX 16-50mm",
     notes: "A Mode • f/5.6-f/8 • Auto ISO • -0.3 EV • WB Cloudy",
+    favorite: false,
   },
 ];
 
@@ -107,7 +107,6 @@ function loadMoments() {
   if (savedData) {
     moments = JSON.parse(savedData);
 
-    // Αν το localStorage είναι άδειο array, βάλε demo cards
     if (moments.length === 0) {
       moments = sampleMoments;
       saveMoments();
@@ -129,14 +128,21 @@ function renderMoments() {
   const selectedCategory = filterCategory.value;
 
   const filteredMoments = moments.filter((moment) => {
+    const title = moment.title || "";
+    const location = moment.location || "";
+    const notes = moment.notes || "";
+    const lens = moment.lens || "";
+    const category = moment.category || "";
+
     const matchesSearch =
-      moment.title.toLowerCase().includes(searchTerm) ||
-      moment.location.toLowerCase().includes(searchTerm) ||
-      moment.notes.toLowerCase().includes(searchTerm) ||
-      moment.lens.toLowerCase().includes(searchTerm);
+      title.toLowerCase().includes(searchTerm) ||
+      location.toLowerCase().includes(searchTerm) ||
+      notes.toLowerCase().includes(searchTerm) ||
+      lens.toLowerCase().includes(searchTerm);
 
     const matchesCategory =
-      selectedCategory === "all" || moment.category.toLowerCase === selectedCategory;
+      selectedCategory === "all" ||
+      category.toLowerCase() === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -152,25 +158,35 @@ function renderMoments() {
 
   filteredMoments.forEach((moment, index) => {
     const card = document.createElement("article");
+
     card.className = "photo-card";
     card.style.animationDelay = `${index * 0.06}s`;
 
     card.innerHTML = `
-  <img src="${moment.image}" alt="${moment.title}" />
+      <img src="${moment.image}" alt="${moment.title}" />
 
-  <button class="favorite-btn ${moment.favorite ? "active" : ""}" data-id="${moment.id}">
-  ★
-</button>
+      <button
+        class="favorite-btn ${moment.favorite ? "active" : ""}"
+        data-id="${moment.id}"
+      >
+        ★
+      </button>
 
-  <div class="card-overlay"></div>
+      <button class="delete-btn" data-id="${moment.id}">
+        🗑
+      </button>
 
-  <div class="card-content">
-    <span class="category-badge">${moment.category}</span>
-    <p class="card-location">${moment.location}</p>
-    <h3 class="card-title">${moment.title}</h3>
-    <p class="card-meta">${moment.lens}</p>
-  </div>
-`;
+      <div class="card-overlay"></div>
+
+      <div class="card-content">
+        <span class="category-badge">${moment.category}</span>
+        <p class="card-location">${moment.location}</p>
+        <h3 class="card-title">${moment.title}</h3>
+        <p class="card-meta">${moment.lens}</p>
+      </div>
+    `;
+
+    // Favorite button
     const favoriteBtn = card.querySelector(".favorite-btn");
 
     favoriteBtn.addEventListener("click", (event) => {
@@ -178,6 +194,15 @@ function renderMoments() {
       toggleFavorite(moment.id);
     });
 
+    // Delete button
+    const deleteBtn = card.querySelector(".delete-btn");
+
+    deleteBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      deleteMoment(moment.id);
+    });
+
+    // Open fullscreen viewer
     card.addEventListener("click", () => {
       openPhotoViewer(moment);
     });
@@ -211,9 +236,11 @@ function addMoment(event) {
 
   momentForm.reset();
 }
-// ========================
-//ADD FAVORITE
-//=========================
+
+// =========================
+// FAVORITE SYSTEM
+// =========================
+
 function toggleFavorite(id) {
   moments = moments.map((moment) => {
     if (moment.id === id) {
@@ -231,23 +258,39 @@ function toggleFavorite(id) {
 }
 
 // =========================
+// DELETE SYSTEM
+// =========================
+
+function deleteMoment(id) {
+  const confirmDelete = confirm("Delete this photo moment?");
+
+  if (!confirmDelete) return;
+
+  moments = moments.filter((moment) => moment.id !== id);
+
+  saveMoments();
+  renderMoments();
+}
+
+// =========================
 // FULLSCREEN VIEWER
 // =========================
-//OPEN
+
 function openPhotoViewer(moment) {
   viewerImage.src = moment.image;
-  viewerTitle.textContent = moment.title;
-  viewerLocation.textContent = moment.location;
-  viewerLens.textContent = moment.lens;
-  viewerNotes.textContent = moment.notes;
-  viewerCategory.textContent = moment.category;
+  viewerImage.alt = moment.title;
+
+  viewerTitle.textContent = moment.title || "Untitled";
+  viewerLocation.textContent = moment.location || "Unknown location";
+  viewerLens.textContent = moment.lens || "No lens";
+  viewerNotes.textContent = moment.notes || "No notes yet.";
+  viewerCategory.textContent = moment.category || "Uncategorized";
 
   photoViewer.classList.add("active");
 
   document.body.style.overflow = "hidden";
 }
 
-//CLOSE
 function closePhotoViewer() {
   photoViewer.classList.add("closing");
 
@@ -281,6 +324,9 @@ function setupBottomNavigation() {
 
 momentForm.addEventListener("submit", addMoment);
 
+searchInput.addEventListener("input", renderMoments);
+filterCategory.addEventListener("change", renderMoments);
+
 viewerCloseBtn.addEventListener("click", closePhotoViewer);
 
 photoViewer.addEventListener("click", (event) => {
@@ -289,15 +335,11 @@ photoViewer.addEventListener("click", (event) => {
   }
 });
 
-// Close viewer with ESC key
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
+  if (event.key === "Escape" && photoViewer.classList.contains("active")) {
     closePhotoViewer();
   }
 });
-
-searchInput.addEventListener("input", renderMoments);
-filterCategory.addEventListener("change", renderMoments);
 
 // =========================
 // INIT APP
@@ -310,9 +352,3 @@ function initApp() {
 }
 
 initApp();
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closePhotoViewer();
-  }
-});
