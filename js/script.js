@@ -42,7 +42,7 @@ const viewerNotes = document.getElementById("viewer-notes");
 const viewerCategory = document.getElementById("viewer-category");
 
 const submitBtn = document.getElementById("submit-btn");
-
+const cancelEditBtn = document.getElementById("cancel-edit-btn");
 // Bottom navigation
 const navItems = document.querySelectorAll(".nav-item");
 
@@ -207,6 +207,7 @@ function renderMoments() {
     editBtn.addEventListener("click", (event) => {
       event.stopPropagation();
       startEditMoment(moment.id);
+      cancelEditBtn.classList.remove("hidden");
     });
 
     // Delete button
@@ -270,6 +271,7 @@ function addMoment(event) {
   renderMoments();
   momentForm.reset();
   submitBtn.textContent = "Add Moment";
+  cancelEditBtn.classList.add("hidden");
 }
 
 // =========================
@@ -304,6 +306,16 @@ function startEditMoment(id) {
 
     behavior: "smooth",
   });
+}
+
+// =========================
+// CANCEL SYSTEM
+// =========================
+function cancelEditMoment() {
+  editingMomentId = null;
+  momentForm.reset();
+  submitBtn.textContent = "Add Moment";
+  cancelEditBtn.classList.add("hidden");
 }
 
 // =========================
@@ -409,7 +421,7 @@ document.addEventListener("keydown", (event) => {
     closePhotoViewer();
   }
 });
-
+cancelEditBtn.addEventListener("click", cancelEditMoment);
 // =========================
 // INIT APP
 // =========================
