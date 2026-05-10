@@ -4,6 +4,8 @@
 
 let moments = [];
 
+let editingMomentId = null;
+
 const STORAGE_KEY = "photo-moments-app-data";
 
 // =========================
@@ -38,6 +40,8 @@ const viewerTitle = document.getElementById("viewer-title");
 const viewerLens = document.getElementById("viewer-lens");
 const viewerNotes = document.getElementById("viewer-notes");
 const viewerCategory = document.getElementById("viewer-category");
+
+const submitBtn = document.getElementById("submit-btn");
 
 // Bottom navigation
 const navItems = document.querySelectorAll(".nav-item");
@@ -141,8 +145,7 @@ function renderMoments() {
       lens.toLowerCase().includes(searchTerm);
 
     const matchesCategory =
-      selectedCategory === "all" ||
-      category.toLowerCase() === selectedCategory;
+      selectedCategory === "all" || category.toLowerCase() === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -172,6 +175,10 @@ function renderMoments() {
         ★
       </button>
 
+      <button class="edit-btn" data-id="${moment.id}">
+  ✎
+</button>
+
       <button class="delete-btn" data-id="${moment.id}">
         🗑
       </button>
@@ -192,6 +199,14 @@ function renderMoments() {
     favoriteBtn.addEventListener("click", (event) => {
       event.stopPropagation();
       toggleFavorite(moment.id);
+    });
+
+    // Edit button
+    const editBtn = card.querySelector(".edit-btn");
+
+    editBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      startEditMoment(moment.id);
     });
 
     // Delete button
@@ -218,23 +233,77 @@ function renderMoments() {
 function addMoment(event) {
   event.preventDefault();
 
-  const newMoment = {
-    id: crypto.randomUUID(),
-    title: titleInput.value.trim(),
-    location: locationInput.value.trim(),
-    image: imageInput.value.trim(),
-    category: categoryInput.value,
-    lens: lensInput.value.trim(),
-    notes: notesInput.value.trim(),
-    favorite: false,
-  };
+  if (editingMomentId) {
+    moments = moments.map((moment) => {
+      if (moment.id === editingMomentId) {
+        return {
+          ...moment,
+          title: titleInput.value.trim(),
+          location: locationInput.value.trim(),
+          image: imageInput.value.trim(),
+          category: categoryInput.value,
+          lens: lensInput.value.trim(),
+          notes: notesInput.value.trim(),
+        };
+      }
 
-  moments.unshift(newMoment);
+      return moment;
+    });
+
+    editingMomentId = null;
+  } else {
+    const newMoment = {
+      id: crypto.randomUUID(),
+      title: titleInput.value.trim(),
+      location: locationInput.value.trim(),
+      image: imageInput.value.trim(),
+      category: categoryInput.value,
+      lens: lensInput.value.trim(),
+      notes: notesInput.value.trim(),
+      favorite: false,
+    };
+
+    moments.unshift(newMoment);
+  }
 
   saveMoments();
   renderMoments();
-
   momentForm.reset();
+  submitBtn.textContent = "Add Moment";
+}
+
+// =========================
+
+// EDIT MOMENT
+
+// =========================
+
+function startEditMoment(id) {
+  const momentToEdit = moments.find((moment) => moment.id === id);
+
+  if (!momentToEdit) return;
+
+  editingMomentId = id;
+
+  titleInput.value = momentToEdit.title;
+
+  locationInput.value = momentToEdit.location;
+
+  imageInput.value = momentToEdit.image;
+
+  categoryInput.value = momentToEdit.category;
+
+  lensInput.value = momentToEdit.lens;
+
+  notesInput.value = momentToEdit.notes;
+
+  submitBtn.textContent = "Update Moment";
+
+  window.scrollTo({
+    top: 0,
+
+    behavior: "smooth",
+  });
 }
 
 // =========================
