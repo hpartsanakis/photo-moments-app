@@ -1,508 +1,236 @@
-/* =========================
-   1. DATA
-   Default cards for first app load.
-   If localStorage has saved cards,
-   these default cards will be replaced.
-========================= */
+// =========================
+// STATE
+// =========================
 
-const cards = [
+// Main app data
+let moments = [];
+
+// LocalStorage key
+const STORAGE_KEY = "photo-moments-app-data";
+
+// =========================
+// SELECTORS
+// =========================
+
+// Form elements
+const momentForm = document.getElementById("moment-form");
+const titleInput = document.getElementById("title-input");
+const locationInput = document.getElementById("location-input");
+const imageInput = document.getElementById("image-input");
+const categoryInput = document.getElementById("category-input");
+const lensInput = document.getElementById("lens-input");
+const notesInput = document.getElementById("notes-input");
+
+// Gallery elements
+const galleryGrid = document.getElementById("gallery-grid");
+const momentCount = document.getElementById("moment-count");
+
+// Fullscreen viewer elements
+const photoViewer = document.getElementById("photo-viewer");
+const viewerCloseBtn = document.getElementById("viewer-close-btn");
+const viewerImage = document.getElementById("viewer-image");
+const viewerLocation = document.getElementById("viewer-location");
+const viewerTitle = document.getElementById("viewer-title");
+const viewerMeta = document.getElementById("viewer-meta");
+const viewerNotes = document.getElementById("viewer-notes");
+
+// Bottom navigation
+const navItems = document.querySelectorAll(".nav-item");
+
+// =========================
+// SAMPLE DATA
+// =========================
+
+// These demo moments appear only if localStorage is empty
+const sampleMoments = [
   {
-    id: 1,
-    collection: "moments",
-    title: "Blue Hour in Frankfurt",
-    location: "Frankfurt am Main",
-    content: "Perfect reflections after rain near the river.",
-    settings: "Nikon Z50 · 40mm · f/2.8 · 1/250s · ISO 200",
-    learning:
-      "Blue hour gives softer contrast. Reflections become stronger after rain.",
-    image: null,
+    id: crypto.randomUUID(),
+    title: "Aurora over Tromsø",
+    location: "Tromsø • Norway",
+    image:
+      "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1200&q=80",
+    category: "Aurora",
+    lens: "Viltrox 13mm",
+    notes: "M Mode • f/1.8 • ISO 1600 • 1s • WB 4000K",
   },
   {
-    id: 2,
-    collection: "learning",
-    title: "Shutter Speed Practice",
-    location: "Photography Notes",
-    content: "Testing how shutter speed affects movement.",
-    settings: "1/1000s freezes action · 1/30s creates motion blur",
-    learning: "Fast shutter freezes movement. Slow shutter shows motion.",
-    image: null,
+    id: crypto.randomUUID(),
+    title: "Snow Street Mood",
+    location: "Lofoten • Norway",
+    image:
+      "https://images.unsplash.com/photo-1516431883659-655d41c09bf9?auto=format&fit=crop&w=1200&q=80",
+    category: "Snow",
+    lens: "DX 16-50mm",
+    notes: "A Mode • f/5.6 • Auto ISO • -0.7 EV",
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Harbor Reflections",
+    location: "Svolvær • Norway",
+    image:
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+    category: "Reflection",
+    lens: "DX 12-28mm",
+    notes: "M Mode • f/8 • ISO 100 • 6s • tripod",
   },
 ];
 
-/* Load saved cards from browser */
-const savedCards = localStorage.getItem("photoMomentsCards");
+// =========================
+// STORAGE
+// =========================
 
-if (savedCards) {
-  cards.length = 0;
-  cards.push(...JSON.parse(savedCards));
+function saveMoments() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(moments));
 }
 
-/* =========================
-   2. DOM ELEMENTS
-   These are HTML elements we control with JS.
-========================= */
+function loadMoments() {
+  const savedData = localStorage.getItem(STORAGE_KEY);
 
-const cardsContainer = document.getElementById("cardsContainer");
-const searchInput = document.getElementById("searchInput");
-const sortSelect = document.getElementById("sortSelect");
+  if (savedData) {
+    moments = JSON.parse(savedData);
 
-const addCardBtn = document.getElementById("addCardBtn");
-const installBtn = document.getElementById("installBtn");
-
-const cardModal = document.getElementById("cardModal");
-const closeModalBtn = document.getElementById("closeModalBtn");
-const cardForm = document.getElementById("cardForm");
-
-const imageInput = document.getElementById("imageInput");
-const titleInput = document.getElementById("titleInput");
-const locationInput = document.getElementById("locationInput");
-const contentInput = document.getElementById("contentInput");
-const settingsInput = document.getElementById("settingsInput");
-const learningInput = document.getElementById("learningInput");
-
-const modalTitle = document.getElementById("modalTitle");
-const collectionButtons = document.querySelectorAll(".collection-btn");
-
-/* =========================
-   3. APP STATE
-========================= */
-
-let activeCollection = "moments";
-let editingCardId = null;
-let deferredPrompt = null;
-
-/* =========================
-   4. HELPER FUNCTIONS
-========================= */
-
-/* Save cards permanently in browser */
-function saveCards() {
-  localStorage.setItem("photoMomentsCards", JSON.stringify(cards));
+    // Αν το localStorage είναι άδειο array, βάλε demo cards
+    if (moments.length === 0) {
+      moments = sampleMoments;
+      saveMoments();
+    }
+  } else {
+    moments = sampleMoments;
+    saveMoments();
+  }
 }
 
-/* Convert uploaded photo to Base64 */
-function convertImageToBase64(file) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
+// =========================
+// RENDER GALLERY
+// =========================
 
-    reader.onload = function () {
-      resolve(reader.result);
-    };
+function renderMoments() {
+  galleryGrid.innerHTML = "";
 
-    reader.readAsDataURL(file);
-  });
-}
+  momentCount.textContent = `${moments.length} moments`;
 
-/* Get only cards from the active collection */
-function getActiveCollectionCards() {
-  return cards.filter((card) => card.collection === activeCollection);
-}
+  moments.forEach((moment, index) => {
+    const card = document.createElement("article");
+    card.className = "photo-card";
+    card.style.animationDelay = `${index * 0.06}s`;
 
-/* Sort cards based on dropdown */
-function sortCards(data) {
-  const sorted = [...data];
-  const mode = sortSelect.value;
+    card.innerHTML = `
+      <img src="${moment.image}" alt="${moment.title}" />
 
-  if (mode === "newest") {
-    sorted.sort((a, b) => b.id - a.id);
-  }
+      <div class="card-overlay"></div>
 
-  if (mode === "az") {
-    sorted.sort((a, b) => a.title.localeCompare(b.title));
-  }
-
-  if (mode === "za") {
-    sorted.sort((a, b) => b.title.localeCompare(a.title));
-  }
-
-  if (mode === "location") {
-    sorted.sort((a, b) => (a.location || "").localeCompare(b.location || ""));
-  }
-
-  return sorted;
-}
-
-/* =========================
-   5. RENDER PHOTO GRID
-========================= */
-
-function renderCards(data) {
-  const sortedCards = sortCards(data);
-
-  cardsContainer.innerHTML = "";
-
-  if (sortedCards.length === 0) {
-    cardsContainer.innerHTML = `
-      <div class="empty-state">
-        <h3>No moments found</h3>
-        <p>Add your first photo moment.</p>
-      </div>
-    `;
-    return;
-  }
-
-  sortedCards.forEach((card) => {
-    const cardElement = document.createElement("article");
-    cardElement.classList.add("grid-card");
-
-    cardElement.innerHTML = `
-      ${
-        card.image
-          ? `<img src="${card.image}" alt="${card.title}" class="grid-image">`
-          : `<div class="grid-placeholder">📸</div>`
-      }
-
-      <div class="grid-overlay">
-        <h3>${card.title}</h3>
-        <p>${card.location || "No location"}</p>
+      <div class="card-content">
+        <span class="category-badge">${moment.category}</span>
+        <p class="card-location">${moment.location}</p>
+        <h3 class="card-title">${moment.title}</h3>
+        <p class="card-meta">${moment.lens}</p>
       </div>
     `;
 
-    /* Click photo tile -> open detail modal */
-    cardElement.addEventListener("click", () => {
-      openDetailView(card);
+    // Open fullscreen viewer when clicking a card
+    card.addEventListener("click", () => {
+      openPhotoViewer(moment);
     });
 
-    cardsContainer.appendChild(cardElement);
+    galleryGrid.appendChild(card);
   });
 }
 
-/* =========================
-   6. SEARCH + FILTER
-========================= */
+// =========================
+// ADD MOMENT
+// =========================
 
-function applyFiltersAndRender() {
-  const searchTerm = searchInput.value.trim().toLowerCase();
+function addMoment(event) {
+  event.preventDefault();
 
-  let filteredCards = getActiveCollectionCards();
-
-  if (searchTerm) {
-    filteredCards = filteredCards.filter((card) => {
-      return (
-        card.title.toLowerCase().includes(searchTerm) ||
-        (card.location || "").toLowerCase().includes(searchTerm) ||
-        card.content.toLowerCase().includes(searchTerm) ||
-        (card.settings || "").toLowerCase().includes(searchTerm) ||
-        (card.learning || "").toLowerCase().includes(searchTerm)
-      );
-    });
-  }
-
-  renderCards(filteredCards);
-}
-
-/* =========================
-   7. MODAL CONTROL
-========================= */
-
-/* Remove detail view if it exists */
-function removeDetailView() {
-  const detailView = document.getElementById("detailView");
-
-  if (detailView) {
-    detailView.remove();
-  }
-}
-
-/* Open modal in form mode */
-function openFormModal() {
-  removeDetailView();
-
-  modalTitle.textContent =
-    editingCardId === null ? "Add Photo Moment" : "Edit Photo Moment";
-
-  cardForm.style.display = "block";
-  cardModal.classList.remove("hidden");
-}
-
-/* Close modal and reset state */
-function closeModal() {
-  cardModal.classList.add("hidden");
-
-  removeDetailView();
-
-  modalTitle.textContent = "Add Photo Moment";
-  cardForm.style.display = "block";
-
-  cardForm.reset();
-  imageInput.value = "";
-  editingCardId = null;
-}
-
-/* Open modal in detail view mode */
-function openDetailView(card) {
-  removeDetailView();
-
-  /* Hide form because we show details */
-  cardForm.style.display = "none";
-
-  /* Keep modal header empty except close button */
-  modalTitle.textContent = "";
-
-  const detailHTML = `
-    <div class="detail-view" id="detailView">
-
-      <!-- Title ABOVE photo -->
-      <h2 class="detail-title">${card.title}</h2>
-
-      <!-- Photo -->
-      ${
-        card.image
-          ? `<img src="${card.image}" alt="${card.title}" class="detail-image">`
-          : `<div class="detail-placeholder">📸</div>`
-      }
-
-      <!-- Meta information -->
-      <div class="detail-meta">
-        <span>${card.location || "No location"}</span>
-        <span>${card.collection === "learning" ? "Learning" : "Moment"}</span>
-      </div>
-
-      <!-- Story / notes -->
-      <p class="detail-notes">${card.content}</p>
-
-      <!-- Photo settings -->
-      ${
-        card.settings
-          ? `
-            <div class="info-box">
-              <strong>⚙️ Photo Settings</strong>
-              <p>${card.settings}</p>
-            </div>
-          `
-          : ""
-      }
-
-      <!-- Learning note -->
-      ${
-        card.learning
-          ? `
-            <div class="info-box">
-              <strong>🧠 Learning Note</strong>
-              <p>${card.learning}</p>
-            </div>
-          `
-          : ""
-      }
-
-      <!-- Actions -->
-      <div class="photo-actions">
-        <button type="button" class="edit-btn" id="detailEditBtn">Edit</button>
-        <button type="button" class="delete-btn" id="detailDeleteBtn">Delete</button>
-      </div>
-    </div>
-  `;
-
-  /*
-    IMPORTANT:
-    Insert detail view AFTER modal-header.
-    This makes the title appear above the photo,
-    not beside it.
-  */
-  const modalHeader = document.querySelector(".modal-header");
-  modalHeader.insertAdjacentHTML("afterend", detailHTML);
-
-  /* Edit from detail view */
-  document.getElementById("detailEditBtn").addEventListener("click", () => {
-    closeModal();
-    editCard(card.id);
-  });
-
-  /* Delete from detail view */
-  document.getElementById("detailDeleteBtn").addEventListener("click", () => {
-    deleteCard(card.id);
-    closeModal();
-  });
-
-  cardModal.classList.remove("hidden");
-}
-
-/* =========================
-   8. CRUD FUNCTIONS
-========================= */
-
-/* Create new card */
-async function createCard() {
-  let imageData = null;
-
-  if (imageInput.files[0]) {
-    imageData = await convertImageToBase64(imageInput.files[0]);
-  }
-
-  const newCard = {
-    id: Date.now(),
-    collection: activeCollection,
+  const newMoment = {
+    id: crypto.randomUUID(),
     title: titleInput.value.trim(),
     location: locationInput.value.trim(),
-    content: contentInput.value.trim(),
-    settings: settingsInput.value.trim(),
-    learning: learningInput.value.trim(),
-    image: imageData,
+    image: imageInput.value.trim(),
+    category: categoryInput.value,
+    lens: lensInput.value.trim(),
+    notes: notesInput.value.trim(),
   };
 
-  cards.push(newCard);
-  saveCards();
+  moments.unshift(newMoment);
+
+  saveMoments();
+  renderMoments();
+
+  momentForm.reset();
 }
 
-/* Update existing card */
-async function updateCard() {
-  const cardToUpdate = cards.find((card) => card.id === editingCardId);
+// =========================
+// FULLSCREEN VIEWER
+// =========================
 
-  if (!cardToUpdate) return;
+function openPhotoViewer(moment) {
+  viewerImage.src = moment.image;
+  viewerImage.alt = moment.title;
 
-  cardToUpdate.title = titleInput.value.trim();
-  cardToUpdate.location = locationInput.value.trim();
-  cardToUpdate.content = contentInput.value.trim();
-  cardToUpdate.settings = settingsInput.value.trim();
-  cardToUpdate.learning = learningInput.value.trim();
+  viewerLocation.textContent = moment.location || "Unknown location";
+  viewerTitle.textContent = moment.title;
+  viewerMeta.textContent = `${moment.lens || "No lens"} • ${moment.category}`;
+  viewerNotes.textContent = moment.notes || "No notes yet.";
 
-  /* If new image selected, replace old image */
-  if (imageInput.files[0]) {
-    cardToUpdate.image = await convertImageToBase64(imageInput.files[0]);
-  }
-
-  saveCards();
+  photoViewer.classList.add("active");
 }
 
-/* Prepare edit mode */
-function editCard(id) {
-  const cardToEdit = cards.find((card) => card.id === id);
-
-  if (!cardToEdit) return;
-
-  editingCardId = id;
-
-  titleInput.value = cardToEdit.title;
-  locationInput.value = cardToEdit.location || "";
-  contentInput.value = cardToEdit.content;
-  settingsInput.value = cardToEdit.settings || "";
-  learningInput.value = cardToEdit.learning || "";
-
-  openFormModal();
-}
-
-/* Delete card */
-function deleteCard(id) {
-  const index = cards.findIndex((card) => card.id === id);
-
-  if (index !== -1) {
-    cards.splice(index, 1);
-    saveCards();
-    applyFiltersAndRender();
-  }
-}
-
-/* =========================
-   9. EVENT LISTENERS
-========================= */
-
-/* Add button */
-addCardBtn.addEventListener("click", () => {
-  editingCardId = null;
-  cardForm.reset();
-  imageInput.value = "";
-  openFormModal();
-});
-
-/* Close modal */
-closeModalBtn.addEventListener("click", closeModal);
-
-/* Submit form */
-cardForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  if (editingCardId === null) {
-    await createCard();
-  } else {
-    await updateCard();
-  }
-
-  closeModal();
-  applyFiltersAndRender();
-});
-
-/* Search */
-searchInput.addEventListener("input", applyFiltersAndRender);
-
-/* Sort */
-sortSelect.addEventListener("change", applyFiltersAndRender);
-
-/* Collection buttons */
-collectionButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    activeCollection = button.dataset.collection;
-    searchInput.value = "";
-
-    collectionButtons.forEach((btn) => {
-      btn.classList.remove("active");
-    });
-
-    button.classList.add("active");
-
-    applyFiltersAndRender();
-  });
-});
-
-/* =========================
-   10. PWA INSTALL BUTTON
-========================= */
-
-window.addEventListener("beforeinstallprompt", (event) => {
-  event.preventDefault();
-
-  deferredPrompt = event;
-  installBtn.style.display = "block";
-});
-
-installBtn.addEventListener("click", async () => {
-  if (!deferredPrompt) return;
-
-  deferredPrompt.prompt();
-  await deferredPrompt.userChoice;
-
-  deferredPrompt = null;
-  installBtn.style.display = "none";
-});
-
-/* =========================
-   11. START APP
-========================= */
-
-applyFiltersAndRender();
-
-/* =========================
-   12. SERVICE WORKER
-========================= */
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("./service-worker.js")
-      .then(() => {
-        console.log("Service Worker registered");
-      })
-      .catch((error) => {
-        console.log("Service Worker registration failed:", error);
-      });
-  });
-}
-
-/* =========================
-   13.SPLASH SCREEN HIDE
-   Hides the splash after the app loads.
-========================= */
-
-window.addEventListener("load", () => {
-  const splash = document.getElementById("splash");
-
-  if (!splash) return;
+function closePhotoViewer() {
+  photoViewer.classList.add("closing");
 
   setTimeout(() => {
-    splash.style.opacity = "0";
-    splash.style.transition = "opacity 0.4s ease";
+    photoViewer.classList.remove("active");
+    photoViewer.classList.remove("closing");
+  }, 250);
+}
 
-    setTimeout(() => {
-      splash.remove();
-    }, 400);
-  }, 650);
+// =========================
+// BOTTOM NAVIGATION
+// =========================
+
+function setupBottomNavigation() {
+  navItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      navItems.forEach((btn) => btn.classList.remove("active"));
+      item.classList.add("active");
+
+      const section = item.dataset.section;
+      console.log("Active section:", section);
+    });
+  });
+}
+
+// =========================
+// EVENT LISTENERS
+// =========================
+
+momentForm.addEventListener("submit", addMoment);
+
+viewerCloseBtn.addEventListener("click", closePhotoViewer);
+
+photoViewer.addEventListener("click", (event) => {
+  if (event.target === photoViewer) {
+    closePhotoViewer();
+  }
 });
+
+// Close viewer with ESC key
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closePhotoViewer();
+  }
+});
+
+// =========================
+// INIT APP
+// =========================
+
+function initApp() {
+  loadMoments();
+  renderMoments();
+  setupBottomNavigation();
+}
+
+initApp();

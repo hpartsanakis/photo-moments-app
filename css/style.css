@@ -1,463 +1,420 @@
 /* =========================
-   1. BASE
+   DESIGN SYSTEM
+========================= */
+
+:root {
+  --bg-main: #0b0f19;
+  --bg-card: #121826;
+  --glass: rgba(255, 255, 255, 0.06);
+
+  --text-main: #f5f7fa;
+  --text-soft: #aab4c3;
+  --text-muted: #6f7b8c;
+
+  --aurora: #5fffb2;
+  --ice: #7fd6ff;
+  --warm: #ffb86b;
+  --danger: #ff6b6b;
+
+  --radius-lg: 24px;
+  --radius-md: 18px;
+
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.25);
+  --shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+/* =========================
+   BASE
 ========================= */
 
 * {
   box-sizing: border-box;
-}
-
-:root {
-  --bg: #0f172a;
-  --surface: #111827;
-  --card: #ffffff;
-  --text: #f9fafb;
-  --dark-text: #111827;
-  --muted: #94a3b8;
-  --border: #e5e7eb;
-  --accent: #f59e0b;
-  --danger-bg: #fee2e2;
-  --danger-text: #7f1d1d;
-  --shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  font-family: "Inter", sans-serif;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(95, 255, 178, 0.12),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(127, 214, 255, 0.12),
+      transparent 30%
+    ),
+    var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding-bottom: 110px;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
 
 /* =========================
-   2. HEADER
+   APP LAYOUT
 ========================= */
 
+.app-shell {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 28px 18px;
+}
+
 .app-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  padding: 18px 16px 14px;
-  background: rgba(15, 23, 42, 0.96);
-  backdrop-filter: blur(12px);
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  color: var(--aurora);
+  font-size: 12px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
 
 .app-header h1 {
-  margin: 0;
-  font-size: 26px;
+  font-size: 34px;
+  line-height: 1.1;
+  margin-bottom: 10px;
 }
 
-.app-header p {
-  margin: 4px 0 14px;
-  color: var(--muted);
-  font-size: 14px;
+.header-text {
+  color: var(--text-soft);
+  font-size: 15px;
+  line-height: 1.6;
 }
 
-#searchInput {
+/* =========================
+   FORM
+========================= */
+
+.form-card {
+  background: var(--glass);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 32px;
+}
+
+.form-card h2 {
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+}
+
+input,
+select,
+textarea {
   width: 100%;
-  min-height: 46px;
-  padding: 0 14px;
-  border: none;
-  border-radius: 14px;
-  font-size: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-main);
+  border-radius: 16px;
+  padding: 13px 14px;
   outline: none;
 }
 
-.header-actions {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
 }
 
-#sortSelect,
-.install-btn {
-  min-height: 44px;
-  border-radius: 14px;
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.primary-btn {
   border: none;
-  padding: 0 12px;
-  font-size: 15px;
-}
-
-.install-btn {
-  background: var(--accent);
-  color: white;
-  cursor: pointer;
-}
-
-/* =========================
-   3. COLLECTIONS
-========================= */
-
-.collections-bar {
-  display: flex;
-  gap: 10px;
-  padding: 14px 16px 0;
-  overflow-x: auto;
-}
-
-.collection-btn {
-  border: none;
-  background: rgba(255, 255, 255, 0.14);
-  color: var(--text);
-  padding: 10px 14px;
-  border-radius: 999px;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.collection-btn.active {
-  background: var(--accent);
-  color: white;
-}
-
-/* =========================
-   4. PHOTO GRID
-========================= */
-
-.cards-container {
-  padding: 16px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  max-width: 920px;
-  margin: 0 auto 90px;
-}
-
-.grid-card {
-  position: relative;
-  height: 180px;
   border-radius: 18px;
-  overflow: hidden;
-  background: #1e293b;
-  box-shadow: var(--shadow);
+  padding: 14px;
+  color: #071016;
+  font-weight: 700;
   cursor: pointer;
-}
-
-.grid-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Placeholder when card has no photo */
-.grid-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #334155, #020617);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 42px;
-}
-
-/* Text on the photo */
-.grid-overlay {
-  position: absolute;
-  inset: auto 0 0 0;
-  padding: 12px;
-  color: white;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.78));
-}
-
-.grid-overlay h3 {
-  margin: 0 0 4px;
-  font-size: 15px;
-}
-
-.grid-overlay p {
-  margin: 0;
-  font-size: 12px;
-  opacity: 0.85;
+  background: linear-gradient(135deg, var(--aurora), var(--ice));
 }
 
 /* =========================
-   5. MODAL
+   GALLERY
 ========================= */
 
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  background: rgba(0, 0, 0, 0.58);
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-
-.modal.hidden {
-  display: none;
-}
-
-.modal-content {
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  background: white;
-  color: var(--dark-text);
-  border-radius: 22px 22px 0 0;
-  padding: 20px 16px 28px;
-}
-
-.modal-header {
+.section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 18px;
 }
 
-.modal-header h2 {
-  margin: 0;
+.section-header h2 {
   font-size: 22px;
 }
 
-.close-btn {
-  border: none;
-  background: transparent;
-  font-size: 32px;
-  cursor: pointer;
-  line-height: 1;
-}
-
-/* =========================
-   6. DETAIL VIEW
-========================= */
-
-.detail-view {
-  display: block;
-}
-
-/* Title is above the photo */
-.detail-title {
-  margin: 0 0 14px;
-  font-size: 26px;
-  font-weight: 700;
-  color: #111827;
-  line-height: 1.15;
-}
-
-.detail-image {
-  width: 100%;
-  border-radius: 16px;
-  margin-bottom: 14px;
-  display: block;
-}
-
-.detail-placeholder {
-  height: 220px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #334155, #020617);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 44px;
-  margin-bottom: 14px;
-}
-
-.detail-meta {
-  display: flex;
-  justify-content: space-between;
-  color: #64748b;
+.section-header span {
+  color: var(--text-soft);
   font-size: 13px;
-  margin-bottom: 12px;
 }
 
-.detail-notes {
-  line-height: 1.6;
-  color: #374151;
-  font-size: 16px;
-}
-
-/* Settings and learning boxes */
-.info-box {
-  background: #f8fafc;
-  border-radius: 14px;
-  padding: 12px;
-  margin-bottom: 12px;
-}
-
-.info-box strong {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 14px;
-}
-
-.info-box p {
-  margin: 0;
-  font-size: 14px;
-  color: #475569;
-  line-height: 1.5;
-}
-
-.photo-actions {
+.gallery-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
 }
 
-.edit-btn,
-.delete-btn {
-  min-height: 42px;
-  border: none;
-  border-radius: 12px;
+/* =========================
+   PREMIUM PHOTO CARD
+========================= */
+
+.photo-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 360px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  font-size: 14px;
-}
-
-.edit-btn {
-  background: #e5e7eb;
-}
-
-.delete-btn {
-  background: var(--danger-bg);
-  color: var(--danger-text);
-}
-
-/* =========================
-   7. FLOATING ADD BUTTON
-========================= */
-
-.fab {
-  position: fixed;
-  right: 18px;
-  bottom: 22px;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  border: none;
-  background: var(--accent);
-  color: white;
-  font-size: 34px;
-  line-height: 1;
-  box-shadow: var(--shadow);
-  cursor: pointer;
-  z-index: 30;
-}
-
-/* =========================
-   8. FORM
-========================= */
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  font-weight: bold;
-  margin-bottom: 6px;
-  font-size: 14px;
-}
-
-.form-group input,
-.form-group textarea {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px;
-  font-size: 16px;
-  font-family: inherit;
-}
-
-.submit-btn {
-  width: 100%;
-  min-height: 48px;
-  border: none;
-  border-radius: 14px;
-  background: var(--surface);
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-/* =========================
-   9. EMPTY STATE
-========================= */
-
-.empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--muted);
-}
-
-/* =========================
-   10. ANIMATIONS
-========================= */
-
-/* Smooth appearance for every photo tile */
-.grid-card {
+  box-shadow: var(--shadow-soft);
+  background: var(--bg-card);
   transition:
-    transform 0.22s ease,
-    box-shadow 0.22s ease;
-  animation: cardFadeIn 0.35s ease both;
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
-/* Desktop hover */
-.grid-card:hover {
-  transform: translateY(-4px) scale(1.01);
+.photo-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
 }
 
-/* Mobile press feeling */
-.grid-card:active {
-  transform: scale(0.97);
+.photo-card img {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
 }
 
-/* Image subtle zoom on hover */
-.grid-card:hover .grid-image {
+.photo-card:hover img {
   transform: scale(1.04);
 }
 
-.grid-image {
-  transition: transform 0.35s ease;
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.78),
+    rgba(0, 0, 0, 0.15),
+    transparent
+  );
 }
 
-/* Modal background fade */
-.modal {
-  animation: modalFadeIn 0.25s ease both;
+.card-content {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
 }
 
-/* Modal content slide / zoom */
-.modal-content {
-  animation: modalSlideUp 0.28s ease both;
+.card-location {
+  color: var(--ice);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
 }
 
-/* Detail image animation */
-.detail-image,
-.detail-placeholder {
-  animation: imageReveal 0.35s ease both;
+.card-title {
+  font-size: 20px;
+  line-height: 1.2;
+  margin-bottom: 10px;
 }
 
-/* Detail content animation */
-.detail-title,
-.detail-meta,
-.detail-notes,
-.info-box,
-.photo-actions {
-  animation: detailFadeUp 0.35s ease both;
+.card-meta {
+  color: var(--text-soft);
+  font-size: 12px;
 }
 
-/* Splash screen */
-#splash {
+.category-badge {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px);
+}
+
+/* =========================
+   FULLSCREEN VIEWER
+========================= */
+
+.photo-viewer {
   position: fixed;
   inset: 0;
-  background: #0f172a;
-  display: flex;
+  background: rgba(5, 8, 15, 0.92);
+  backdrop-filter: blur(24px);
+  z-index: 999;
+  display: none;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  padding: 24px;
 }
 
-#splash img {
-  width: 104px;
-  height: 104px;
-  border-radius: 24px;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
-  animation: splashPop 0.55s ease both;
+.photo-viewer.active {
+  display: flex;
 }
 
-/* Keyframes */
-@keyframes cardFadeIn {
+.viewer-content {
+  width: min(100%, 900px);
+  animation: viewerOpen 0.35s ease;
+}
+
+.viewer-content img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.viewer-info {
+  margin-top: 18px;
+}
+
+.viewer-info p:first-child {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--ice);
+  text-transform: uppercase;
+}
+
+.viewer-info h2 {
+  font-size: 26px;
+  margin: 6px 0;
+}
+
+.viewer-info span {
+  display: block;
+  color: var(--text-soft);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.viewer-info p:last-child {
+  color: #d6dbe4;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.viewer-close-btn {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 30px;
+  cursor: pointer;
+  backdrop-filter: blur(16px);
+}
+
+@keyframes viewerOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* =========================
+   BOTTOM NAVIGATION
+========================= */
+
+.bottom-nav {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  height: 72px;
+  z-index: 900;
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+}
+
+.nav-item {
+  border: none;
+  background: transparent;
+  color: var(--text-soft);
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+  min-width: 54px;
+  padding: 8px 6px;
+  border-radius: 18px;
+
+  transition: 0.25s ease;
+}
+
+.nav-item span {
+  font-size: 21px;
+}
+
+.nav-item small {
+  font-size: 11px;
+}
+
+.nav-item.active {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.nav-item:hover {
+  color: var(--ice);
+  transform: translateY(-2px);
+}
+
+/* =========================
+   SMOOTH ANIMATIONS
+========================= */
+
+/* Page entrance */
+.app-shell {
+  animation: appFadeIn 0.6s ease;
+}
+
+@keyframes appFadeIn {
   from {
     opacity: 0;
     transform: translateY(12px);
@@ -469,20 +426,15 @@ body {
   }
 }
 
-@keyframes modalFadeIn {
-  from {
-    background: rgba(0, 0, 0, 0);
-  }
-
-  to {
-    background: rgba(0, 0, 0, 0.58);
-  }
+/* Cards entrance */
+.photo-card {
+  animation: cardFadeUp 0.45s ease both;
 }
 
-@keyframes modalSlideUp {
+@keyframes cardFadeUp {
   from {
     opacity: 0;
-    transform: translateY(40px) scale(0.97);
+    transform: translateY(18px) scale(0.98);
   }
 
   to {
@@ -491,77 +443,53 @@ body {
   }
 }
 
-@keyframes imageReveal {
+/* Button press feeling */
+.primary-btn:active,
+.nav-item:active,
+.viewer-close-btn:active {
+  transform: scale(0.96);
+}
+
+/* Input focus premium glow */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(127, 214, 255, 0.55);
+  box-shadow: 0 0 0 4px rgba(127, 214, 255, 0.08);
+}
+
+/* Viewer close animation support */
+.photo-viewer.closing .viewer-content {
+  animation: viewerClose 0.25s ease forwards;
+}
+
+@keyframes viewerClose {
   from {
-    opacity: 0;
-    transform: scale(0.96);
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 
   to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes detailFadeUp {
-  from {
     opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes splashPop {
-  from {
-    opacity: 0;
-    transform: scale(0.85);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Better desktop modal animation */
-@media (min-width: 769px) {
-  @keyframes modalSlideUp {
-    from {
-      opacity: 0;
-      transform: scale(0.94);
-    }
-
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+    transform: scale(0.96) translateY(16px);
   }
 }
 
 /* =========================
-   11. DESKTOP
+   MOBILE
 ========================= */
 
-@media (min-width: 769px) {
-  .cards-container {
-    grid-template-columns: repeat(3, 1fr);
+@media (max-width: 600px) {
+  .app-header h1 {
+    font-size: 30px;
   }
 
-  .grid-card {
-    height: 220px;
+  .photo-card,
+  .photo-card img {
+    min-height: 420px;
   }
 
-  .modal {
-    align-items: center;
-    padding: 20px;
-  }
-
-  .modal-content {
-    max-width: 680px;
-    border-radius: 22px;
+  .viewer-info h2 {
+    font-size: 22px;
   }
 }
