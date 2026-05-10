@@ -476,6 +476,42 @@ textarea:focus {
 }
 
 /* =========================
+   PREMIUM EMPTY STATE
+========================= */
+
+.empty-state {
+  display: none;
+  text-align: center;
+  padding: 48px 24px;
+  border-radius: var(--radius-lg);
+  background: var(--glass);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-soft);
+}
+
+.empty-state.active {
+  display: block;
+  animation: cardFadeUp 0.45s ease both;
+}
+
+.empty-icon {
+  font-size: 42px;
+  margin-bottom: 14px;
+}
+
+.empty-state h3 {
+  color: var(--text-main);
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* =========================
    MOBILE
 ========================= */
 

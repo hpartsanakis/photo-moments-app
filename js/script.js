@@ -24,6 +24,7 @@ const notesInput = document.getElementById("notes-input");
 // Gallery elements
 const galleryGrid = document.getElementById("gallery-grid");
 const momentCount = document.getElementById("moment-count");
+const emptyState = document.getElementById("empty-state");
 
 // Fullscreen viewer elements
 const photoViewer = document.getElementById("photo-viewer");
@@ -45,13 +46,13 @@ const navItems = document.querySelectorAll(".nav-item");
 const sampleMoments = [
   {
     id: crypto.randomUUID(),
-    title: "Aurora over Tromsø",
+    title: "Aurora over Tromsø Fjord",
     location: "Tromsø • Norway",
     image:
       "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1200&q=80",
     category: "Aurora",
-    lens: "Viltrox 13mm",
-    notes: "M Mode • f/1.8 • ISO 1600 • 1s • WB 4000K",
+    lens: "Viltrox 13mm f/1.4",
+    notes: "M Mode • f/1.8 • ISO 1600 • 1s • WB 4000K • Tripod",
   },
   {
     id: crypto.randomUUID(),
@@ -60,18 +61,28 @@ const sampleMoments = [
     image:
       "https://images.unsplash.com/photo-1516431883659-655d41c09bf9?auto=format&fit=crop&w=1200&q=80",
     category: "Snow",
-    lens: "DX 16-50mm",
-    notes: "A Mode • f/5.6 • Auto ISO • -0.7 EV",
+    lens: "DX 16-50mm @ 40mm",
+    notes: "A Mode • f/5.6 • Auto ISO • 1/250s • -0.7 EV",
   },
   {
     id: crypto.randomUUID(),
-    title: "Harbor Reflections",
+    title: "Harbor Lights Reflection",
     location: "Svolvær • Norway",
     image:
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
     category: "Reflection",
     lens: "DX 12-28mm",
-    notes: "M Mode • f/8 • ISO 100 • 6s • tripod",
+    notes: "M Mode • f/8 • ISO 100 • 6s • WB 3800K • Tripod",
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Rainy Window Landscape",
+    location: "Hotel Window • Norway",
+    image:
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80",
+    category: "Rain",
+    lens: "DX 16-50mm",
+    notes: "A Mode • f/5.6-f/8 • Auto ISO • -0.3 EV • WB Cloudy",
   },
 ];
 
@@ -109,6 +120,13 @@ function renderMoments() {
 
   momentCount.textContent = `${moments.length} moments`;
 
+  if (moments.length === 0) {
+    emptyState.classList.add("active");
+    return;
+  }
+
+  emptyState.classList.remove("active");
+
   moments.forEach((moment, index) => {
     const card = document.createElement("article");
     card.className = "photo-card";
@@ -127,7 +145,6 @@ function renderMoments() {
       </div>
     `;
 
-    // Open fullscreen viewer when clicking a card
     card.addEventListener("click", () => {
       openPhotoViewer(moment);
     });
