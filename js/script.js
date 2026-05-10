@@ -21,6 +21,10 @@ const categoryInput = document.getElementById("category-input");
 const lensInput = document.getElementById("lens-input");
 const notesInput = document.getElementById("notes-input");
 
+//Search elements
+const searchInput = document.getElementById("search-input");
+const filterCategory = document.getElementById("filter-category");
+
 // Gallery elements
 const galleryGrid = document.getElementById("gallery-grid");
 const momentCount = document.getElementById("moment-count");
@@ -32,8 +36,9 @@ const viewerCloseBtn = document.getElementById("viewer-close-btn");
 const viewerImage = document.getElementById("viewer-image");
 const viewerLocation = document.getElementById("viewer-location");
 const viewerTitle = document.getElementById("viewer-title");
-const viewerMeta = document.getElementById("viewer-meta");
+const viewerLens = document.getElementById("viewer-lens");
 const viewerNotes = document.getElementById("viewer-notes");
+const viewerCategory = document.getElementById("viewer-category");
 
 // Bottom navigation
 const navItems = document.querySelectorAll(".nav-item");
@@ -47,12 +52,13 @@ const sampleMoments = [
   {
     id: crypto.randomUUID(),
     title: "Aurora over Tromsø Fjord",
-    location: "Tromsø • Norway",
+    location: "Tromso • Norway",
     image:
       "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1200&q=80",
     category: "Aurora",
     lens: "Viltrox 13mm f/1.4",
     notes: "M Mode • f/1.8 • ISO 1600 • 1s • WB 4000K • Tripod",
+    favorite: false,
   },
   {
     id: crypto.randomUUID(),
@@ -73,6 +79,7 @@ const sampleMoments = [
     category: "Reflection",
     lens: "DX 12-28mm",
     notes: "M Mode • f/8 • ISO 100 • 6s • WB 3800K • Tripod",
+    favorite: false,
   },
   {
     id: crypto.randomUUID(),
@@ -118,32 +125,58 @@ function loadMoments() {
 function renderMoments() {
   galleryGrid.innerHTML = "";
 
-  momentCount.textContent = `${moments.length} moments`;
+  const searchTerm = searchInput.value.toLowerCase().trim();
+  const selectedCategory = filterCategory.value;
 
-  if (moments.length === 0) {
+  const filteredMoments = moments.filter((moment) => {
+    const matchesSearch =
+      moment.title.toLowerCase().includes(searchTerm) ||
+      moment.location.toLowerCase().includes(searchTerm) ||
+      moment.notes.toLowerCase().includes(searchTerm) ||
+      moment.lens.toLowerCase().includes(searchTerm);
+
+    const matchesCategory =
+      selectedCategory === "all" || moment.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  momentCount.textContent = `${filteredMoments.length} moments`;
+
+  if (filteredMoments.length === 0) {
     emptyState.classList.add("active");
     return;
   }
 
   emptyState.classList.remove("active");
 
-  moments.forEach((moment, index) => {
+  filteredMoments.forEach((moment, index) => {
     const card = document.createElement("article");
     card.className = "photo-card";
     card.style.animationDelay = `${index * 0.06}s`;
 
     card.innerHTML = `
-      <img src="${moment.image}" alt="${moment.title}" />
+  <img src="${moment.image}" alt="${moment.title}" />
 
-      <div class="card-overlay"></div>
+  <button class="favorite-btn ${moment.favorite ? "active" : ""}" data-id="${moment.id}">
+  ★
+</button>
 
-      <div class="card-content">
-        <span class="category-badge">${moment.category}</span>
-        <p class="card-location">${moment.location}</p>
-        <h3 class="card-title">${moment.title}</h3>
-        <p class="card-meta">${moment.lens}</p>
-      </div>
-    `;
+  <div class="card-overlay"></div>
+
+  <div class="card-content">
+    <span class="category-badge">${moment.category}</span>
+    <p class="card-location">${moment.location}</p>
+    <h3 class="card-title">${moment.title}</h3>
+    <p class="card-meta">${moment.lens}</p>
+  </div>
+`;
+    const favoriteBtn = card.querySelector(".favorite-btn");
+
+    favoriteBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleFavorite(moment.id);
+    });
 
     card.addEventListener("click", () => {
       openPhotoViewer(moment);
@@ -168,6 +201,7 @@ function addMoment(event) {
     category: categoryInput.value,
     lens: lensInput.value.trim(),
     notes: notesInput.value.trim(),
+    favorite: false,
   };
 
   moments.unshift(newMoment);
@@ -177,29 +211,51 @@ function addMoment(event) {
 
   momentForm.reset();
 }
+// ========================
+//ADD FAVORITE
+//=========================
+function toggleFavorite(id) {
+  moments = moments.map((moment) => {
+    if (moment.id === id) {
+      return {
+        ...moment,
+        favorite: !moment.favorite,
+      };
+    }
+
+    return moment;
+  });
+
+  saveMoments();
+  renderMoments();
+}
 
 // =========================
 // FULLSCREEN VIEWER
 // =========================
-
+//OPEN
 function openPhotoViewer(moment) {
   viewerImage.src = moment.image;
-  viewerImage.alt = moment.title;
-
-  viewerLocation.textContent = moment.location || "Unknown location";
   viewerTitle.textContent = moment.title;
-  viewerMeta.textContent = `${moment.lens || "No lens"} • ${moment.category}`;
-  viewerNotes.textContent = moment.notes || "No notes yet.";
+  viewerLocation.textContent = moment.location;
+  viewerLens.textContent = moment.lens;
+  viewerNotes.textContent = moment.notes;
+  viewerCategory.textContent = moment.category;
 
   photoViewer.classList.add("active");
+
+  document.body.style.overflow = "hidden";
 }
 
+//CLOSE
 function closePhotoViewer() {
   photoViewer.classList.add("closing");
 
   setTimeout(() => {
     photoViewer.classList.remove("active");
     photoViewer.classList.remove("closing");
+
+    document.body.style.overflow = "auto";
   }, 250);
 }
 
@@ -240,6 +296,9 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+searchInput.addEventListener("input", renderMoments);
+filterCategory.addEventListener("change", renderMoments);
+
 // =========================
 // INIT APP
 // =========================
@@ -251,3 +310,9 @@ function initApp() {
 }
 
 initApp();
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closePhotoViewer();
+  }
+});

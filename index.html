@@ -15,6 +15,9 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <link rel="manifest" href="manifest.json" />
+
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
   </head>
 
   <body>
@@ -72,7 +75,24 @@
           <span id="moment-count">0 moments</span>
         </div>
 
-        <div class="gallery-grid" id="gallery-grid"></div>
+        <div class="gallery-controls">
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Search moments..."
+          />
+
+          <select id="filter-category">
+            <option value="all">All Categories</option>
+            <option value="Aurora">Aurora</option>
+            <option value="Street">Street</option>
+            <option value="Snow">Snow</option>
+            <option value="Reflection">Reflection</option>
+            <option value="Portrait">Portrait</option>
+            <option value="Rain">Rain</option>
+          </select>
+        </div>
+
         <div class="gallery-grid" id="gallery-grid"></div>
 
         <div class="empty-state" id="empty-state">
@@ -85,16 +105,29 @@
 
     <!-- FULLSCREEN VIEWER -->
     <div class="photo-viewer" id="photo-viewer">
-      <button class="viewer-close-btn" id="viewer-close-btn">×</button>
+      <button class="viewer-close-btn" id="viewer-close-btn">✕</button>
 
       <div class="viewer-content">
         <img id="viewer-image" src="" alt="" />
 
         <div class="viewer-info">
-          <p id="viewer-location"></p>
+          <span id="viewer-category" class="viewer-category"></span>
+
           <h2 id="viewer-title"></h2>
-          <span id="viewer-meta"></span>
-          <p id="viewer-notes"></p>
+
+          <p id="viewer-location" class="viewer-location"></p>
+
+          <div class="viewer-meta">
+            <p>
+              <strong>Lens:</strong>
+              <span id="viewer-lens"></span>
+            </p>
+          </div>
+
+          <div class="viewer-notes-box">
+            <h3>Field Notes</h3>
+            <p id="viewer-notes"></p>
+          </div>
         </div>
       </div>
     </div>
