@@ -136,7 +136,7 @@ function renderMoments() {
       moment.lens.toLowerCase().includes(searchTerm);
 
     const matchesCategory =
-      selectedCategory === "all" || moment.category === selectedCategory;
+      selectedCategory === "all" || moment.category.toLowerCase === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
