@@ -144,8 +144,7 @@ function renderMoments() {
       lens.toLowerCase().includes(searchTerm);
 
     const matchesCategory =
-      selectedCategory === "all" ||
-      category.toLowerCase() === selectedCategory;
+      selectedCategory === "all" || category.toLowerCase() === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -228,7 +227,117 @@ function renderMoments() {
     galleryGrid.appendChild(card);
   });
 }
+function renderFavoriteMoments() {
+  galleryGrid.innerHTML = "";
 
+  const favoriteMoments = moments.filter((moment) => moment.favorite);
+
+  momentCount.textContent = `${favoriteMoments.length} favorite moments`;
+
+  if (favoriteMoments.length === 0) {
+    emptyState.classList.add("active");
+
+    emptyState.innerHTML = `
+      <div class="empty-icon">⭐</div>
+      <h3>No favorite moments yet</h3>
+      <p>Tap the star icon on a photo to save favorites.</p>
+    `;
+
+    return;
+  }
+
+  emptyState.classList.remove("active");
+
+  favoriteMoments.forEach((moment, index) => {
+    const card = document.createElement("article");
+
+    card.className = "photo-card";
+    card.style.animationDelay = `${index * 0.06}s`;
+
+    card.innerHTML = `
+      <img src="${moment.image}" alt="${moment.title}" />
+
+      <button
+        class="favorite-btn active"
+        data-id="${moment.id}"
+      >
+        ★
+      </button>
+
+      <button
+        class="edit-btn"
+        data-id="${moment.id}"
+      >
+        ✎
+      </button>
+
+      <button
+        class="delete-btn"
+        data-id="${moment.id}"
+      >
+        🗑
+      </button>
+
+      <div class="card-overlay"></div>
+
+      <div class="card-content">
+        <span class="category-badge">
+          ${moment.category}
+        </span>
+
+        <p class="card-location">
+          ${moment.location}
+        </p>
+
+        <h3 class="card-title">
+          ${moment.title}
+        </h3>
+
+        <p class="card-meta">
+          ${moment.lens}
+        </p>
+      </div>
+    `;
+
+    // FAVORITE BUTTON
+    const favoriteBtn = card.querySelector(".favorite-btn");
+
+    favoriteBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+
+      toggleFavorite(moment.id);
+
+      renderFavoriteMoments();
+    });
+
+    // EDIT BUTTON
+    const editBtn = card.querySelector(".edit-btn");
+
+    editBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+
+      startEditMoment(moment.id);
+    });
+
+    // DELETE BUTTON
+    const deleteBtn = card.querySelector(".delete-btn");
+
+    deleteBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+
+      deleteMoment(moment.id);
+
+      renderFavoriteMoments();
+    });
+
+    // OPEN VIEWER
+    card.addEventListener("click", () => {
+      openPhotoViewer(moment);
+    });
+
+    galleryGrid.appendChild(card);
+  });
+}
 // =========================
 // ADD / UPDATE MOMENT
 // =========================
@@ -388,10 +497,21 @@ function closePhotoViewer() {
 function setupBottomNavigation() {
   navItems.forEach((item) => {
     item.addEventListener("click", () => {
-      navItems.forEach((btn) => btn.classList.remove("active"));
+      navItems.forEach((btn) => {
+        btn.classList.remove("active");
+      });
+
       item.classList.add("active");
 
       const section = item.dataset.section;
+
+      // FAVORITES MODE
+      if (section === "favorites") {
+        renderFavoriteMoments();
+      } else {
+        renderMoments();
+      }
+
       console.log("Active section:", section);
     });
   });
