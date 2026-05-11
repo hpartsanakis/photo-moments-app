@@ -1,21 +1,46 @@
+// =========================
+// STATE
+// =========================
+
+// Main app data
 let moments = [];
+
+// Used when editing an existing moment
 let editingMomentId = null;
+
+// Used by fullscreen viewer navigation
 let currentViewerIndex = 0;
+
+// Current gallery mode: "gallery" or "favorites"
 let currentView = "gallery";
-let selectedImageData = "";
+
+// Selected image file from Finder/iPhone.
+// Important: the real file is saved in IndexedDB, not localStorage.
+let selectedImageFile = null;
+
+// Touch positions for swipe gestures
 let touchStartX = 0;
 let touchEndX = 0;
 
+// localStorage stores only metadata
 const STORAGE_KEY = "photo-moments-app-data";
 
+// =========================
+// SELECTORS
+// =========================
+
+// Form
 const momentForm = document.getElementById("moment-form");
 const formTitle = document.getElementById("form-title");
+
 const titleInput = document.getElementById("title-input");
 const locationInput = document.getElementById("location-input");
 const tripInput = document.getElementById("trip-input");
 const dateInput = document.getElementById("date-input");
+
 const fileInput = document.getElementById("file-input");
 const imageInput = document.getElementById("image-input");
+
 const categoryInput = document.getElementById("category-input");
 const cameraInput = document.getElementById("camera-input");
 const lensInput = document.getElementById("lens-input");
@@ -23,23 +48,29 @@ const apertureInput = document.getElementById("aperture-input");
 const shutterInput = document.getElementById("shutter-input");
 const isoInput = document.getElementById("iso-input");
 const wbInput = document.getElementById("wb-input");
+
 const notesInput = document.getElementById("notes-input");
+
 const submitBtn = document.getElementById("submit-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 
+// Stats
 const totalStat = document.getElementById("total-stat");
 const favoriteStat = document.getElementById("favorite-stat");
 const categoryStat = document.getElementById("category-stat");
 const norwayStat = document.getElementById("norway-stat");
 
+// Assistant
 const assistantScenario = document.getElementById("assistant-scenario");
 const assistantOutput = document.getElementById("assistant-output");
 const lensAdvice = document.getElementById("lens-advice");
 const weatherAdvice = document.getElementById("weather-advice");
 
+// Aurora checklist
 const auroraChecks = document.querySelectorAll(".aurora-card input");
 const auroraStatus = document.getElementById("aurora-status");
 
+// Gallery
 const galleryTitle = document.getElementById("gallery-title");
 const galleryGrid = document.getElementById("gallery-grid");
 const momentCount = document.getElementById("moment-count");
@@ -47,10 +78,12 @@ const emptyState = document.getElementById("empty-state");
 const searchInput = document.getElementById("search-input");
 const filterCategory = document.getElementById("filter-category");
 
+// Viewer
 const photoViewer = document.getElementById("photo-viewer");
 const viewerCloseBtn = document.getElementById("viewer-close-btn");
 const viewerPrevBtn = document.getElementById("viewer-prev-btn");
 const viewerNextBtn = document.getElementById("viewer-next-btn");
+
 const viewerImage = document.getElementById("viewer-image");
 const viewerCategory = document.getElementById("viewer-category");
 const viewerTitle = document.getElementById("viewer-title");
@@ -58,10 +91,15 @@ const viewerLocation = document.getElementById("viewer-location");
 const viewerMeta = document.getElementById("viewer-meta");
 const viewerNotes = document.getElementById("viewer-notes");
 
+// Navigation / buttons
 const navItems = document.querySelectorAll(".nav-item");
 const floatingAddBtn = document.getElementById("floating-add-btn");
 const presetButtons = document.querySelectorAll(".preset-btn");
 const clearDataBtn = document.getElementById("clear-data-btn");
+
+// =========================
+// SAMPLE DATA
+// =========================
 
 const sampleMoments = [
   {
@@ -72,6 +110,7 @@ const sampleMoments = [
     date: "2026-02-12",
     image:
       "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1200&q=80",
+    imageStorage: "url",
     category: "Aurora",
     camera: "Nikon Z50",
     lens: "Viltrox 13mm f/1.4",
@@ -90,6 +129,7 @@ const sampleMoments = [
     date: "2026-02-13",
     image:
       "https://images.unsplash.com/photo-1516431883659-655d41c09bf9?auto=format&fit=crop&w=1200&q=80",
+    imageStorage: "url",
     category: "Snow",
     camera: "Nikon Z50",
     lens: "DX 16-50mm @ 40mm",
@@ -108,6 +148,7 @@ const sampleMoments = [
     date: "2026-02-14",
     image:
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+    imageStorage: "url",
     category: "Reflection",
     camera: "Nikon Z50",
     lens: "DX 12-28mm",
@@ -120,23 +161,139 @@ const sampleMoments = [
   },
 ];
 
+// =========================
+// STORAGE
+// =========================
+
 function saveMoments() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(moments));
   } catch (error) {
-    alert(
-      "Storage is full. Please delete some moments or use Image URLs instead of large local photos.",
-    );
-
     console.error("Storage error:", error);
+
+    alert(
+      "Storage is full. The app now stores images in IndexedDB, but old large base64 data may still exist. Please clear old data from Settings if needed.",
+    );
   }
 }
 
 function loadMoments() {
   const saved = localStorage.getItem(STORAGE_KEY);
-  moments = saved ? JSON.parse(saved) : sampleMoments;
+
+  if (!saved) {
+    moments = sampleMoments;
+    saveMoments();
+    return;
+  }
+
+  moments = JSON.parse(saved);
+
+  // Remove old broken base64 image records from previous localStorage version
+  moments = moments.filter((moment) => {
+    if (!moment.image) return false;
+
+    if (typeof moment.image === "string" && moment.image.startsWith("data:")) {
+      return false;
+    }
+
+    return true;
+  });
+
+  if (moments.length === 0) {
+    moments = sampleMoments;
+  }
+
   saveMoments();
 }
+
+// =========================
+// IMAGE HANDLING
+// =========================
+
+// This function returns the correct image source:
+// - URL images are used directly
+// - IndexedDB images are loaded from the image database
+async function getMomentImageSrc(moment) {
+  if (moment.imageStorage === "indexeddb") {
+    const imageRecord = await getImageFromDB(moment.image);
+
+    if (!imageRecord) return "";
+
+    return URL.createObjectURL(imageRecord.file);
+  }
+
+  return moment.image;
+}
+
+// User chooses image from Finder/iPhone.
+// We do NOT convert it to base64 anymore.
+// We keep the File temporarily and save it to IndexedDB on submit.
+async function handleFileUpload() {
+  const file = fileInput.files[0];
+
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    alert("Please choose an image file.");
+    fileInput.value = "";
+    selectedImageFile = null;
+    return;
+  }
+
+  selectedImageFile = file;
+  imageInput.value = "";
+
+  await autofillExifFromFile(file);
+}
+
+async function autofillExifFromFile(file) {
+  if (typeof exifr === "undefined") {
+    console.warn("EXIF library not loaded.");
+    return;
+  }
+
+  try {
+    const exif = await exifr.parse(file);
+
+    if (!exif) return;
+
+    if (exif.Model) {
+      cameraInput.value = exif.Model;
+    }
+
+    if (exif.LensModel) {
+      lensInput.value = exif.LensModel;
+    }
+
+    if (exif.FNumber) {
+      apertureInput.value = `f/${exif.FNumber}`;
+    }
+
+    if (exif.ExposureTime) {
+      shutterInput.value = formatShutter(exif.ExposureTime);
+    }
+
+    if (exif.ISO) {
+      isoInput.value = String(exif.ISO);
+    }
+
+    if (exif.DateTimeOriginal) {
+      dateInput.value = new Date(exif.DateTimeOriginal)
+        .toISOString()
+        .split("T")[0];
+    }
+
+    notesInput.value =
+      `${notesInput.value ? notesInput.value + "\n" : ""}` +
+      "EXIF auto-filled from uploaded image.";
+  } catch (error) {
+    console.warn("Could not read EXIF:", error);
+  }
+}
+
+// =========================
+// FILTERING
+// =========================
 
 function getVisibleMoments() {
   const searchTerm = searchInput.value.toLowerCase().trim();
@@ -147,24 +304,29 @@ function getVisibleMoments() {
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .filter((moment) => {
       const text = `
-        ${moment.title}
-        ${moment.location}
-        ${moment.trip}
-        ${moment.notes}
-        ${moment.lens}
+        ${moment.title || ""}
+        ${moment.location || ""}
+        ${moment.trip || ""}
+        ${moment.notes || ""}
+        ${moment.lens || ""}
+        ${moment.camera || ""}
       `.toLowerCase();
 
       const matchesSearch = text.includes(searchTerm);
 
       const matchesCategory =
         selectedCategory === "all" ||
-        moment.category.toLowerCase() === selectedCategory;
+        (moment.category || "").toLowerCase() === selectedCategory;
 
       return matchesSearch && matchesCategory;
     });
 }
 
-function renderMoments() {
+// =========================
+// RENDER GALLERY
+// =========================
+
+async function renderMoments() {
   const visibleMoments = getVisibleMoments();
 
   galleryGrid.innerHTML = "";
@@ -177,12 +339,19 @@ function renderMoments() {
 
   emptyState.classList.toggle("hidden", visibleMoments.length !== 0);
 
-  visibleMoments.forEach((moment) => {
+  for (const moment of visibleMoments) {
     const card = document.createElement("article");
-    card.className = `photo-card ${moment.category.toLowerCase()}-card`;
+
+    const categoryClass = (moment.category || "general")
+      .toLowerCase()
+      .replaceAll(" ", "-");
+
+    card.className = `photo-card ${categoryClass}-card`;
+
+    const imageSrc = await getMomentImageSrc(moment);
 
     card.innerHTML = `
-      <img src="${moment.image}" alt="${moment.title}" />
+      <img src="${imageSrc}" alt="${moment.title}" />
 
       <button class="favorite-btn ${moment.favorite ? "active" : ""}">
         ★
@@ -199,46 +368,81 @@ function renderMoments() {
       <div class="card-overlay"></div>
 
       <div class="card-content">
-        <span class="trip-badge">${moment.trip || "General Collection"}</span>
+        <span class="trip-badge">
+          ${moment.trip || "General Collection"}
+        </span>
+
         <br />
-        <span class="category-badge">${moment.category}</span>
 
-        <p class="card-location">${moment.location}</p>
-        <p class="card-date">${formatDate(moment.date)}</p>
+        <span class="category-badge">
+          ${moment.category}
+        </span>
 
-        <h3 class="card-title">${moment.title}</h3>
-        <p class="card-meta">${moment.camera} • ${moment.lens}</p>
+        <p class="card-location">
+          ${moment.location || "Unknown location"}
+        </p>
+
+        <p class="card-date">
+          ${formatDate(moment.date)}
+        </p>
+
+        <h3 class="card-title">
+          ${moment.title}
+        </h3>
+
+        <p class="card-meta">
+          ${moment.camera} • ${moment.lens}
+        </p>
       </div>
     `;
 
     card.querySelector(".favorite-btn").addEventListener("click", (event) => {
       event.stopPropagation();
+
       toggleFavorite(moment.id);
     });
 
     card.querySelector(".edit-btn").addEventListener("click", (event) => {
       event.stopPropagation();
+
       startEdit(moment.id);
     });
 
     card.querySelector(".delete-btn").addEventListener("click", (event) => {
       event.stopPropagation();
+
       deleteMoment(moment.id);
     });
 
-    card.addEventListener("click", () => openViewer(moment.id));
+    card.addEventListener("click", () => {
+      openViewer(moment.id);
+    });
 
     galleryGrid.appendChild(card);
-  });
+  }
 }
 
-function addOrUpdateMoment(event) {
+// =========================
+// ADD / UPDATE MOMENT
+// =========================
+
+async function addOrUpdateMoment(event) {
   event.preventDefault();
 
-  const image = selectedImageData || imageInput.value.trim();
+  const momentId = editingMomentId || crypto.randomUUID();
+
+  let image = imageInput.value.trim();
+  let imageStorage = "url";
+
+  if (selectedImageFile) {
+    await saveImageToDB(momentId, selectedImageFile);
+
+    image = momentId;
+    imageStorage = "indexeddb";
+  }
 
   if (!image) {
-    alert("Please choose a photo or paste an image URL.");
+    alert("Please choose a photo or paste an Image URL.");
     return;
   }
 
@@ -248,6 +452,7 @@ function addOrUpdateMoment(event) {
     trip: tripInput.value.trim() || "General Collection",
     date: dateInput.value || new Date().toISOString().split("T")[0],
     image,
+    imageStorage,
     category: categoryInput.value,
     camera: cameraInput.value,
     lens: lensInput.value,
@@ -260,11 +465,16 @@ function addOrUpdateMoment(event) {
 
   if (editingMomentId) {
     moments = moments.map((moment) =>
-      moment.id === editingMomentId ? { ...moment, ...data } : moment,
+      moment.id === editingMomentId
+        ? {
+            ...moment,
+            ...data,
+          }
+        : moment,
     );
   } else {
     moments.unshift({
-      id: crypto.randomUUID(),
+      id: momentId,
       favorite: false,
       ...data,
     });
@@ -272,12 +482,19 @@ function addOrUpdateMoment(event) {
 
   saveMoments();
   resetForm();
-  renderMoments();
+
+  await renderMoments();
+
   updateStats();
 }
 
+// =========================
+// EDIT / RESET
+// =========================
+
 function startEdit(id) {
   const moment = moments.find((item) => item.id === id);
+
   if (!moment) return;
 
   editingMomentId = id;
@@ -286,83 +503,127 @@ function startEdit(id) {
   submitBtn.textContent = "Update Moment";
   cancelEditBtn.classList.remove("hidden");
 
-  titleInput.value = moment.title;
-  locationInput.value = moment.location;
-  tripInput.value = moment.trip;
-  dateInput.value = moment.date;
-  imageInput.value = moment.image.startsWith("data:") ? "" : moment.image;
-  selectedImageData = moment.image.startsWith("data:") ? moment.image : "";
-  categoryInput.value = moment.category;
-  cameraInput.value = moment.camera;
-  lensInput.value = moment.lens;
-  apertureInput.value = moment.aperture;
-  shutterInput.value = moment.shutter;
-  isoInput.value = moment.iso;
-  wbInput.value = moment.wb;
-  notesInput.value = moment.notes;
+  titleInput.value = moment.title || "";
+  locationInput.value = moment.location || "";
+  tripInput.value = moment.trip || "";
+  dateInput.value = moment.date || "";
 
-  document.getElementById("add-section").scrollIntoView({ behavior: "smooth" });
+  imageInput.value = moment.imageStorage === "url" ? moment.image : "";
+  selectedImageFile = null;
+
+  categoryInput.value = moment.category || "Aurora";
+  cameraInput.value = moment.camera || "Nikon Z50";
+  lensInput.value = moment.lens || "DX 16-50mm";
+  apertureInput.value = moment.aperture || "f/5.6";
+  shutterInput.value = moment.shutter || "1/250s";
+  isoInput.value = moment.iso || "Auto";
+  wbInput.value = moment.wb || "Auto";
+
+  notesInput.value = moment.notes || "";
+
+  document.getElementById("add-section").scrollIntoView({
+    behavior: "smooth",
+  });
 }
 
 function resetForm() {
   editingMomentId = null;
-  selectedImageData = "";
+  selectedImageFile = null;
+
   momentForm.reset();
+
   formTitle.textContent = "Add New Moment";
   submitBtn.textContent = "Add Moment";
   cancelEditBtn.classList.add("hidden");
 }
 
-function toggleFavorite(id) {
+// =========================
+// FAVORITE / DELETE
+// =========================
+
+async function toggleFavorite(id) {
   moments = moments.map((moment) =>
-    moment.id === id ? { ...moment, favorite: !moment.favorite } : moment,
+    moment.id === id
+      ? {
+          ...moment,
+          favorite: !moment.favorite,
+        }
+      : moment,
   );
 
   saveMoments();
-  renderMoments();
+
+  await renderMoments();
+
   updateStats();
 }
 
-function deleteMoment(id) {
+async function deleteMoment(id) {
   if (!confirm("Delete this moment?")) return;
+
+  const momentToDelete = moments.find((moment) => moment.id === id);
+
+  if (momentToDelete && momentToDelete.imageStorage === "indexeddb") {
+    await deleteImageFromDB(momentToDelete.image);
+  }
 
   moments = moments.filter((moment) => moment.id !== id);
 
   saveMoments();
-  renderMoments();
+
+  await renderMoments();
+
   updateStats();
 }
 
+// =========================
+// STATS
+// =========================
+
 function updateStats() {
   totalStat.textContent = moments.length;
+
   favoriteStat.textContent = moments.filter((moment) => moment.favorite).length;
 
-  categoryStat.textContent = new Set(
-    moments.map((moment) => moment.category),
-  ).size;
+  const uniqueCategories = new Set(moments.map((moment) => moment.category));
+
+  categoryStat.textContent = uniqueCategories.size;
 
   norwayStat.textContent = moments.filter((moment) =>
     (moment.location || "").toLowerCase().includes("norway"),
   ).length;
 }
 
-function openViewer(id) {
+// =========================
+// FULLSCREEN VIEWER
+// =========================
+
+async function openViewer(id) {
   currentViewerIndex = moments.findIndex((moment) => moment.id === id);
-  updateViewer();
+
+  await updateViewer();
+
   photoViewer.classList.add("active");
   document.body.style.overflow = "hidden";
 }
 
-function updateViewer() {
+async function updateViewer() {
   const moment = moments[currentViewerIndex];
+
   if (!moment) return;
 
-  viewerImage.src = moment.image;
+  const imageSrc = await getMomentImageSrc(moment);
+
+  viewerImage.src = imageSrc;
   viewerImage.alt = moment.title;
+
   viewerCategory.textContent = moment.category;
   viewerTitle.textContent = moment.title;
-  viewerLocation.textContent = `${moment.location} • ${formatDate(moment.date)}`;
+
+  viewerLocation.textContent = `${moment.location || "Unknown location"} • ${formatDate(moment.date)}`;
+
   viewerMeta.textContent = `${moment.camera} • ${moment.lens} • ${moment.aperture} • ${moment.shutter} • ISO ${moment.iso} • WB ${moment.wb}`;
+
   viewerNotes.textContent = moment.notes || "No notes.";
 }
 
@@ -371,16 +632,22 @@ function closeViewer() {
   document.body.style.overflow = "auto";
 }
 
-function showNextMoment() {
+async function showNextMoment() {
   currentViewerIndex = (currentViewerIndex + 1) % moments.length;
-  updateViewer();
+
+  await updateViewer();
 }
 
-function showPreviousMoment() {
+async function showPreviousMoment() {
   currentViewerIndex =
     (currentViewerIndex - 1 + moments.length) % moments.length;
-  updateViewer();
+
+  await updateViewer();
 }
+
+// =========================
+// ASSISTANT
+// =========================
 
 function updateAssistant() {
   const scenario = assistantScenario.value;
@@ -416,6 +683,10 @@ function updateAssistant() {
   lensAdvice.textContent = lensTips[scenario];
   weatherAdvice.textContent = weatherTips[scenario];
 }
+
+// =========================
+// PRESETS
+// =========================
 
 function setupPresets() {
   presetButtons.forEach((button) => {
@@ -477,6 +748,10 @@ function setupPresets() {
   });
 }
 
+// =========================
+// AURORA READINESS
+// =========================
+
 function updateAuroraReadiness() {
   const ready = [...auroraChecks].every((check) => check.checked);
 
@@ -487,10 +762,15 @@ function updateAuroraReadiness() {
   auroraStatus.classList.toggle("ready", ready);
 }
 
+// =========================
+// NAVIGATION
+// =========================
+
 function setupNavigation() {
   navItems.forEach((item) => {
-    item.addEventListener("click", () => {
+    item.addEventListener("click", async () => {
       navItems.forEach((btn) => btn.classList.remove("active"));
+
       item.classList.add("active");
 
       const tab = item.dataset.tab;
@@ -498,33 +778,39 @@ function setupNavigation() {
       currentView = tab === "favorites" ? "favorites" : "gallery";
 
       if (tab === "gallery" || tab === "favorites") {
-        renderMoments();
-        document
-          .getElementById("gallery-section")
-          .scrollIntoView({ behavior: "smooth" });
+        await renderMoments();
+
+        document.getElementById("gallery-section").scrollIntoView({
+          behavior: "smooth",
+        });
       }
 
       if (tab === "add") {
-        document
-          .getElementById("add-section")
-          .scrollIntoView({ behavior: "smooth" });
+        document.getElementById("add-section").scrollIntoView({
+          behavior: "smooth",
+        });
+
         titleInput.focus();
       }
 
       if (tab === "assistant") {
-        document
-          .getElementById("assistant-section")
-          .scrollIntoView({ behavior: "smooth" });
+        document.getElementById("assistant-section").scrollIntoView({
+          behavior: "smooth",
+        });
       }
 
       if (tab === "settings") {
-        document
-          .getElementById("settings-section")
-          .scrollIntoView({ behavior: "smooth" });
+        document.getElementById("settings-section").scrollIntoView({
+          behavior: "smooth",
+        });
       }
     });
   });
 }
+
+// =========================
+// SWIPE
+// =========================
 
 function setupSwipeGestures() {
   photoViewer.addEventListener(
@@ -539,6 +825,7 @@ function setupSwipeGestures() {
     "touchend",
     (event) => {
       touchEndX = event.changedTouches[0].screenX;
+
       const distance = touchEndX - touchStartX;
 
       if (distance < -60) showNextMoment();
@@ -548,31 +835,25 @@ function setupSwipeGestures() {
   );
 }
 
-function handleFileUpload() {
-  const file = fileInput.files[0];
-  if (!file) return;
+// =========================
+// SETTINGS
+// =========================
 
-  const maxSizeMB = 1;
+function clearAllMoments() {
+  if (!confirm("Delete all saved moments?")) return;
 
-  if (file.size > maxSizeMB * 1024 * 1024) {
-    alert(
-      "This photo is too large for browser storage. Please use an image under 1 MB or paste an Image URL.",
-    );
+  localStorage.removeItem(STORAGE_KEY);
 
-    fileInput.value = "";
-    selectedImageData = "";
-    return;
-  }
+  moments = sampleMoments;
 
-  const reader = new FileReader();
-
-  reader.onload = () => {
-    selectedImageData = reader.result;
-    imageInput.value = "";
-  };
-
-  reader.readAsDataURL(file);
+  saveMoments();
+  renderMoments();
+  updateStats();
 }
+
+// =========================
+// HELPERS
+// =========================
 
 function formatDate(dateString) {
   if (!dateString) return "Unknown Date";
@@ -583,6 +864,22 @@ function formatDate(dateString) {
     day: "numeric",
   });
 }
+
+function formatShutter(value) {
+  if (!value) return "";
+
+  if (value >= 1) {
+    return `${value}s`;
+  }
+
+  const denominator = Math.round(1 / value);
+
+  return `1/${denominator}s`;
+}
+
+// =========================
+// EVENTS
+// =========================
 
 momentForm.addEventListener("submit", addOrUpdateMoment);
 cancelEditBtn.addEventListener("click", resetForm);
@@ -606,19 +903,14 @@ auroraChecks.forEach((check) => {
 });
 
 floatingAddBtn.addEventListener("click", () => {
-  document.getElementById("add-section").scrollIntoView({ behavior: "smooth" });
+  document.getElementById("add-section").scrollIntoView({
+    behavior: "smooth",
+  });
+
   titleInput.focus();
 });
 
-clearDataBtn.addEventListener("click", () => {
-  if (!confirm("Delete all saved moments?")) return;
-
-  localStorage.removeItem(STORAGE_KEY);
-  moments = sampleMoments;
-  saveMoments();
-  renderMoments();
-  updateStats();
-});
+clearDataBtn.addEventListener("click", clearAllMoments);
 
 document.addEventListener("keydown", (event) => {
   if (!photoViewer.classList.contains("active")) return;
@@ -628,12 +920,19 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft") showPreviousMoment();
 });
 
-function initApp() {
+// =========================
+// INIT
+// =========================
+
+async function initApp() {
   loadMoments();
-  renderMoments();
+
+  await renderMoments();
+
   updateStats();
   updateAssistant();
   updateAuroraReadiness();
+
   setupPresets();
   setupNavigation();
   setupSwipeGestures();

@@ -40,7 +40,11 @@
         <form id="moment-form">
           <input id="title-input" type="text" placeholder="Title" required />
 
-          <input id="location-input" type="text" placeholder="Location e.g. Tromsø • Norway" />
+          <input
+            id="location-input"
+            type="text"
+            placeholder="Location e.g. Tromsø • Norway"
+          />
 
           <input
             id="trip-input"
@@ -55,11 +59,7 @@
             <input id="file-input" type="file" accept="image/*" />
           </label>
 
-          <input
-            id="image-input"
-            type="url"
-            placeholder="Or paste Image URL"
-          />
+          <input id="image-input" type="url" placeholder="Or paste Image URL" />
 
           <select id="category-input">
             <option value="Aurora">Aurora</option>
@@ -155,7 +155,11 @@
             Add Moment
           </button>
 
-          <button type="button" class="secondary-btn hidden" id="cancel-edit-btn">
+          <button
+            type="button"
+            class="secondary-btn hidden"
+            id="cancel-edit-btn"
+          >
             Cancel Edit
           </button>
         </form>
@@ -242,7 +246,11 @@
         </div>
 
         <div class="gallery-controls">
-          <input id="search-input" type="text" placeholder="Search moments..." />
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Search moments..."
+          />
 
           <select id="filter-category">
             <option value="all">All Categories</option>
@@ -336,6 +344,8 @@
       </button>
     </nav>
 
+    <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
+    <script src="js/image-db.js"></script>
     <script src="js/script.js"></script>
   </body>
 </html>
