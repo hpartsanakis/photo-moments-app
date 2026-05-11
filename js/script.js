@@ -370,16 +370,11 @@ function updateStats() {
   norwayStat.textContent = norwayShots.length;
 }
 function highlightText(text, searchTerm) {
-
   if (!searchTerm) return text;
 
-  const regex =
-    new RegExp(`(${searchTerm})`, "gi");
+  const regex = new RegExp(`(${searchTerm})`, "gi");
 
-  return text.replace(
-    regex,
-    `<span class="search-highlight">$1</span>`
-  );
+  return text.replace(regex, `<span class="search-highlight">$1</span>`);
 }
 // =========================
 // ADD / UPDATE MOMENT
@@ -614,3 +609,22 @@ function initApp() {
 }
 
 initApp();
+
+// =========================
+// SERVICE WORKER
+// =========================
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+
+      .then(() => {
+        console.log("Service Worker Registered");
+      })
+
+      .catch((error) => {
+        console.log("SW Error:", error);
+      });
+  });
+}
