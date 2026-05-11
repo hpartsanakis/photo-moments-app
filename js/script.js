@@ -204,9 +204,15 @@ function renderMoments() {
 
       <div class="card-content">
         <span class="category-badge">${moment.category}</span>
-        <p class="card-location">${moment.location}</p>
-        <h3 class="card-title">${moment.title}</h3>
-        <p class="card-meta">${moment.lens}</p>
+        <p class="card-location">
+  ${highlightText(moment.location, searchTerm)}
+</p>
+        <h3 class="card-title">
+  ${highlightText(moment.title, searchTerm)}
+</h3>
+        <p class="card-meta">
+  ${highlightText(moment.lens, searchTerm)}
+</p>
       </div>
     `;
 
@@ -362,6 +368,18 @@ function updateStats() {
   );
 
   norwayStat.textContent = norwayShots.length;
+}
+function highlightText(text, searchTerm) {
+
+  if (!searchTerm) return text;
+
+  const regex =
+    new RegExp(`(${searchTerm})`, "gi");
+
+  return text.replace(
+    regex,
+    `<span class="search-highlight">$1</span>`
+  );
 }
 // =========================
 // ADD / UPDATE MOMENT
@@ -590,7 +608,9 @@ document.addEventListener("keydown", (event) => {
 function initApp() {
   loadMoments();
   renderMoments();
+  updateStats();
   setupBottomNavigation();
+  setupFloatingButton();
 }
 
 initApp();
