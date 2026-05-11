@@ -44,6 +44,13 @@ const viewerCategory = document.getElementById("viewer-category");
 
 // Bottom navigation
 const navItems = document.querySelectorAll(".nav-item");
+const totalStat = document.getElementById("total-stat");
+
+const favoriteStat = document.getElementById("favorite-stat");
+
+const categoryStat = document.getElementById("category-stat");
+
+const norwayStat = document.getElementById("norway-stat");
 const floatingAddBtn = document.getElementById("floating-add-btn");
 
 // =========================
@@ -339,6 +346,23 @@ function renderFavoriteMoments() {
     galleryGrid.appendChild(card);
   });
 }
+function updateStats() {
+  totalStat.textContent = moments.length;
+
+  const favorites = moments.filter((moment) => moment.favorite);
+
+  favoriteStat.textContent = favorites.length;
+
+  const uniqueCategories = new Set(moments.map((moment) => moment.category));
+
+  categoryStat.textContent = uniqueCategories.size;
+
+  const norwayShots = moments.filter((moment) =>
+    moment.location.toLowerCase().includes("norway"),
+  );
+
+  norwayStat.textContent = norwayShots.length;
+}
 // =========================
 // ADD / UPDATE MOMENT
 // =========================
@@ -528,8 +552,7 @@ function setupFloatingButton() {
 
     titleInput.focus();
 
-    titleInput.style.boxShadow =
-      "0 0 0 4px rgba(95,255,178,0.25)";
+    titleInput.style.boxShadow = "0 0 0 4px rgba(95,255,178,0.25)";
 
     setTimeout(() => {
       titleInput.style.boxShadow = "none";
