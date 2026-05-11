@@ -6,88 +6,162 @@
 
     <title>Photo Moments App</title>
 
-    <!-- PWA -->
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/png" href="icons/icon-192.png" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css" />
-
-    <!-- Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+
+    <link rel="stylesheet" href="css/style.css" />
   </head>
 
   <body>
-    <!-- APP SHELL -->
     <main class="app-shell">
-      <!-- HEADER -->
-      <header class="app-header">
+      <header class="app-header" id="home-section">
         <p class="eyebrow">Cinematic Photography Journal</p>
-
         <h1>📸 Photo Moments</h1>
-
         <p class="header-text">
-          Save your favorite shots, locations, lenses and field notes.
+          Save your photos, trips, camera settings and field notes.
         </p>
       </header>
 
-      <!-- FORM CARD -->
-      <section class="form-card">
-        <h2>Add New Moment</h2>
+      <section class="form-card" id="add-section">
+        <div class="section-header">
+          <h2 id="form-title">Add New Moment</h2>
+          <span>Photo Journal Entry</span>
+        </div>
 
         <form id="moment-form">
           <input id="title-input" type="text" placeholder="Title" required />
 
+          <input id="location-input" type="text" placeholder="Location e.g. Tromsø • Norway" />
+
           <input
-            id="location-input"
+            id="trip-input"
             type="text"
-            placeholder="Location e.g. Tromsø • Norway"
+            placeholder="Trip e.g. Tromsø Aurora Expedition"
           />
 
-          <input id="image-input" type="url" placeholder="Image URL" required />
+          <input id="date-input" type="date" />
+
+          <label class="file-label">
+            <span>Choose photo from Finder / iPhone</span>
+            <input id="file-input" type="file" accept="image/*" />
+          </label>
+
+          <input
+            id="image-input"
+            type="url"
+            placeholder="Or paste Image URL"
+          />
 
           <select id="category-input">
             <option value="Aurora">Aurora</option>
-            <option value="Street">Street</option>
             <option value="Snow">Snow</option>
+            <option value="Rain">Rain</option>
+            <option value="Street">Street</option>
             <option value="Reflection">Reflection</option>
             <option value="Portrait">Portrait</option>
-            <option value="Rain">Rain</option>
+            <option value="Blue Hour">Blue Hour</option>
+            <option value="Husky">Husky</option>
           </select>
 
-          <input
-            id="lens-input"
-            type="text"
-            placeholder="Lens e.g. Viltrox 13mm"
-          />
+          <div class="settings-grid">
+            <select id="camera-input">
+              <option value="Nikon Z50">Nikon Z50</option>
+              <option value="iPhone">iPhone</option>
+              <option value="Other Camera">Other Camera</option>
+            </select>
 
-          <textarea
-            id="notes-input"
-            placeholder="Notes / camera settings"
-          ></textarea>
+            <select id="lens-input">
+              <option value="Viltrox 13mm f/1.4">Viltrox 13mm f/1.4</option>
+              <option value="DX 12-28mm">DX 12-28mm</option>
+              <option value="DX 16-50mm">DX 16-50mm</option>
+              <option value="DX 16-50mm @ 40mm">DX 16-50mm @ 40mm</option>
+              <option value="DX 50-250mm">DX 50-250mm</option>
+              <option value="iPhone Camera">iPhone Camera</option>
+            </select>
+
+            <select id="aperture-input">
+              <option value="f/1.8">f/1.8</option>
+              <option value="f/2.8">f/2.8</option>
+              <option value="f/4">f/4</option>
+              <option value="f/5.6">f/5.6</option>
+              <option value="f/8">f/8</option>
+              <option value="f/11">f/11</option>
+            </select>
+
+            <select id="shutter-input">
+              <option value="1s">1s</option>
+              <option value="2s">2s</option>
+              <option value="6s">6s</option>
+              <option value="1/30s">1/30s</option>
+              <option value="1/125s">1/125s</option>
+              <option value="1/250s">1/250s</option>
+              <option value="1/500s">1/500s</option>
+              <option value="1/1000s">1/1000s</option>
+            </select>
+
+            <select id="iso-input">
+              <option value="100">ISO 100</option>
+              <option value="200">ISO 200</option>
+              <option value="400">ISO 400</option>
+              <option value="800">ISO 800</option>
+              <option value="1600">ISO 1600</option>
+              <option value="3200">ISO 3200</option>
+              <option value="Auto">ISO Auto</option>
+            </select>
+
+            <select id="wb-input">
+              <option value="4000K">4000K</option>
+              <option value="3800K">3800K</option>
+              <option value="4200K">4200K</option>
+              <option value="Cloudy">Cloudy</option>
+              <option value="Auto">Auto</option>
+            </select>
+          </div>
+
+          <div class="preset-buttons">
+            <button type="button" class="preset-btn" data-preset="aurora">
+              Aurora
+            </button>
+
+            <button type="button" class="preset-btn" data-preset="snow">
+              Snow
+            </button>
+
+            <button type="button" class="preset-btn" data-preset="bluehour">
+              Blue Hour
+            </button>
+
+            <button type="button" class="preset-btn" data-preset="rain">
+              Rain
+            </button>
+
+            <button type="button" class="preset-btn" data-preset="husky">
+              Husky
+            </button>
+          </div>
+
+          <textarea id="notes-input" placeholder="Field notes"></textarea>
 
           <button type="submit" class="primary-btn" id="submit-btn">
             Add Moment
           </button>
 
-          <button
-            type="button"
-            class="secondary-btn hidden"
-            id="cancel-edit-btn"
-          >
+          <button type="button" class="secondary-btn hidden" id="cancel-edit-btn">
             Cancel Edit
           </button>
         </form>
       </section>
 
-      <!-- STATS -->
-      <section class="stats-grid">
+      <section class="stats-grid" id="stats-section">
         <article class="stat-card">
           <p class="stat-label">Total Moments</p>
           <h3 id="total-stat">0</h3>
@@ -109,103 +183,159 @@
         </article>
       </section>
 
-      <!-- GALLERY SECTION -->
-      <section class="gallery-section">
+      <section class="assistant-section" id="assistant-section">
         <div class="section-header">
-          <h2>Gallery</h2>
+          <h2>AI Shooting Assistant</h2>
+          <span>Field Guide</span>
+        </div>
+
+        <div class="assistant-card">
+          <select id="assistant-scenario">
+            <option value="aurora">Aurora Night</option>
+            <option value="bluehour">Blue Hour City</option>
+            <option value="snow">Snow Street</option>
+            <option value="rain">Rainy Window</option>
+            <option value="husky">Husky Action</option>
+          </select>
+
+          <div class="assistant-output" id="assistant-output"></div>
+          <div class="lens-advice" id="lens-advice"></div>
+          <div class="weather-advice" id="weather-advice"></div>
+        </div>
+      </section>
+
+      <section class="aurora-readiness-section" id="aurora-section">
+        <div class="section-header">
+          <h2>Aurora Readiness</h2>
+          <span>Night Shooting Check</span>
+        </div>
+
+        <div class="aurora-card">
+          <label>
+            <input type="checkbox" />
+            Tripod ready
+          </label>
+
+          <label>
+            <input type="checkbox" />
+            Extra battery warm
+          </label>
+
+          <label>
+            <input type="checkbox" />
+            Manual focus checked
+          </label>
+
+          <label>
+            <input type="checkbox" />
+            WB fixed at 4000K
+          </label>
+
+          <p id="aurora-status" class="aurora-status">Not ready yet.</p>
+        </div>
+      </section>
+
+      <section class="gallery-section" id="gallery-section">
+        <div class="section-header">
+          <h2 id="gallery-title">Gallery</h2>
           <span id="moment-count">0 moments</span>
         </div>
 
-        <!-- SEARCH + FILTER -->
         <div class="gallery-controls">
-          <input
-            id="search-input"
-            type="text"
-            placeholder="Search moments..."
-          />
+          <input id="search-input" type="text" placeholder="Search moments..." />
 
           <select id="filter-category">
             <option value="all">All Categories</option>
             <option value="aurora">Aurora</option>
-            <option value="street">Street</option>
             <option value="snow">Snow</option>
+            <option value="rain">Rain</option>
+            <option value="street">Street</option>
             <option value="reflection">Reflection</option>
             <option value="portrait">Portrait</option>
-            <option value="rain">Rain</option>
+            <option value="blue hour">Blue Hour</option>
+            <option value="husky">Husky</option>
           </select>
         </div>
 
-        <!-- PHOTO CARDS RENDER HERE -->
         <div class="gallery-grid" id="gallery-grid"></div>
 
-        <!-- EMPTY STATE -->
-        <div class="empty-state" id="empty-state">
+        <div class="empty-state hidden" id="empty-state">
           <div class="empty-icon">📸</div>
           <h3>No moments found</h3>
-          <p>Try another search term or choose a different category.</p>
+          <p>Add a new photo moment or change your search/filter.</p>
+        </div>
+      </section>
+
+      <section class="settings-section" id="settings-section">
+        <div class="section-header">
+          <h2>Settings</h2>
+          <span>Local App</span>
+        </div>
+
+        <div class="settings-card">
+          <p>
+            Your moments are saved locally in this browser with
+            <strong>localStorage</strong>.
+          </p>
+
+          <button class="danger-btn" id="clear-data-btn">
+            Clear All Moments
+          </button>
         </div>
       </section>
     </main>
 
-    <!-- FULLSCREEN VIEWER -->
     <div class="photo-viewer" id="photo-viewer">
       <button class="viewer-close-btn" id="viewer-close-btn">✕</button>
 
-      <div class="viewer-content">
-        <img id="viewer-image" src="" alt="" />
+      <button class="viewer-nav-btn viewer-prev-btn" id="viewer-prev-btn">
+        ‹
+      </button>
 
-        <div class="viewer-info">
-          <span id="viewer-category" class="viewer-category"></span>
+      <img id="viewer-image" src="" alt="" />
 
-          <h2 id="viewer-title"></h2>
+      <button class="viewer-nav-btn viewer-next-btn" id="viewer-next-btn">
+        ›
+      </button>
 
-          <p id="viewer-location" class="viewer-location"></p>
-
-          <div class="viewer-meta">
-            <p>
-              <strong>Lens:</strong>
-              <span id="viewer-lens"></span>
-            </p>
-          </div>
-
-          <div class="viewer-notes-box">
-            <h3>Field Notes</h3>
-            <p id="viewer-notes"></p>
-          </div>
-        </div>
+      <div class="viewer-info">
+        <span id="viewer-category"></span>
+        <h2 id="viewer-title"></h2>
+        <p id="viewer-location"></p>
+        <p id="viewer-meta"></p>
+        <p id="viewer-notes"></p>
       </div>
     </div>
 
     <button class="floating-add-btn" id="floating-add-btn">+</button>
-    <!-- MOBILE BOTTOM NAVIGATION -->
+
     <nav class="bottom-nav">
-      <button class="nav-item active" data-section="home">
-        <span>🏠</span>
-        <small>Home</small>
+      <button class="nav-item active" data-tab="gallery">
+        <span>📸</span>
+        <p>Gallery</p>
       </button>
 
-      <button class="nav-item" data-section="gallery">
-        <span>🖼️</span>
-        <small>Gallery</small>
-      </button>
-
-      <button class="nav-item" data-section="favorites">
+      <button class="nav-item" data-tab="favorites">
         <span>⭐</span>
-        <small>Favorites</small>
+        <p>Favorites</p>
       </button>
 
-      <button class="nav-item" data-section="notes">
-        <span>📝</span>
-        <small>Notes</small>
+      <button class="nav-item" data-tab="add">
+        <span>➕</span>
+        <p>Add</p>
       </button>
 
-      <button class="nav-item" data-section="settings">
+      <button class="nav-item" data-tab="assistant">
+        <span>🤖</span>
+        <p>Assistant</p>
+      </button>
+
+      <button class="nav-item" data-tab="settings">
         <span>⚙️</span>
-        <small>Settings</small>
+        <p>Settings</p>
       </button>
     </nav>
 
-    <!-- JS -->
     <script src="js/script.js"></script>
   </body>
 </html>
