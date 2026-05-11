@@ -1,204 +1,188 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Photo Moments App</title>
+    <title>Photo Moments App</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/png" href="icons/icon-192.png" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css" />
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css" />
 
-  <!-- Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
-</head>
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-<body>
-  <!-- APP SHELL -->
-  <main class="app-shell">
+  <body>
+    <!-- APP SHELL -->
+    <main class="app-shell">
+      <!-- HEADER -->
+      <header class="app-header">
+        <p class="eyebrow">Cinematic Photography Journal</p>
 
-    <!-- HEADER -->
-    <header class="app-header">
-      <p class="eyebrow">Cinematic Photography Journal</p>
+        <h1>📸 Photo Moments</h1>
 
-      <h1>📸 Photo Moments</h1>
+        <p class="header-text">
+          Save your favorite shots, locations, lenses and field notes.
+        </p>
+      </header>
 
-      <p class="header-text">
-        Save your favorite shots, locations, lenses and field notes.
-      </p>
-    </header>
+      <!-- FORM CARD -->
+      <section class="form-card">
+        <h2>Add New Moment</h2>
 
-    <!-- FORM CARD -->
-    <section class="form-card">
-      <h2>Add New Moment</h2>
+        <form id="moment-form">
+          <input id="title-input" type="text" placeholder="Title" required />
 
-      <form id="moment-form">
-        <input
-          id="title-input"
-          type="text"
-          placeholder="Title"
-          required
-        />
+          <input
+            id="location-input"
+            type="text"
+            placeholder="Location e.g. Tromsø • Norway"
+          />
 
-        <input
-          id="location-input"
-          type="text"
-          placeholder="Location e.g. Tromsø • Norway"
-        />
+          <input id="image-input" type="url" placeholder="Image URL" required />
 
-        <input
-          id="image-input"
-          type="url"
-          placeholder="Image URL"
-          required
-        />
+          <select id="category-input">
+            <option value="Aurora">Aurora</option>
+            <option value="Street">Street</option>
+            <option value="Snow">Snow</option>
+            <option value="Reflection">Reflection</option>
+            <option value="Portrait">Portrait</option>
+            <option value="Rain">Rain</option>
+          </select>
 
-        <select id="category-input">
-          <option value="Aurora">Aurora</option>
-          <option value="Street">Street</option>
-          <option value="Snow">Snow</option>
-          <option value="Reflection">Reflection</option>
-          <option value="Portrait">Portrait</option>
-          <option value="Rain">Rain</option>
-        </select>
+          <input
+            id="lens-input"
+            type="text"
+            placeholder="Lens e.g. Viltrox 13mm"
+          />
 
-        <input
-          id="lens-input"
-          type="text"
-          placeholder="Lens e.g. Viltrox 13mm"
-        />
+          <textarea
+            id="notes-input"
+            placeholder="Notes / camera settings"
+          ></textarea>
 
-        <textarea
-          id="notes-input"
-          placeholder="Notes / camera settings"
-        ></textarea>
+          <button type="submit" class="primary-btn" id="submit-btn">
+            Add Moment
+          </button>
 
-        <button
-          type="submit"
-          class="primary-btn"
-          id="submit-btn"
-        >
-          Add Moment
-        </button>
+          <button
+            type="button"
+            class="secondary-btn hidden"
+            id="cancel-edit-btn"
+          >
+            Cancel Edit
+          </button>
+        </form>
+      </section>
 
-        <button
-          type="button"
-          class="secondary-btn hidden"
-          id="cancel-edit-btn"
-        >
-          Cancel Edit
-        </button>
-      </form>
-    </section>
-
-    <!-- GALLERY SECTION -->
-    <section class="gallery-section">
-      <div class="section-header">
-        <h2>Gallery</h2>
-        <span id="moment-count">0 moments</span>
-      </div>
-
-      <!-- SEARCH + FILTER -->
-      <div class="gallery-controls">
-        <input
-          id="search-input"
-          type="text"
-          placeholder="Search moments..."
-        />
-
-        <select id="filter-category">
-          <option value="all">All Categories</option>
-          <option value="aurora">Aurora</option>
-          <option value="street">Street</option>
-          <option value="snow">Snow</option>
-          <option value="reflection">Reflection</option>
-          <option value="portrait">Portrait</option>
-          <option value="rain">Rain</option>
-        </select>
-      </div>
-
-      <!-- PHOTO CARDS RENDER HERE -->
-      <div class="gallery-grid" id="gallery-grid"></div>
-
-      <!-- EMPTY STATE -->
-      <div class="empty-state" id="empty-state">
-        <div class="empty-icon">📸</div>
-        <h3>No moments found</h3>
-        <p>Try another search term or choose a different category.</p>
-      </div>
-    </section>
-  </main>
-
-  <!-- FULLSCREEN VIEWER -->
-  <div class="photo-viewer" id="photo-viewer">
-    <button class="viewer-close-btn" id="viewer-close-btn">
-      ✕
-    </button>
-
-    <div class="viewer-content">
-      <img id="viewer-image" src="" alt="" />
-
-      <div class="viewer-info">
-        <span id="viewer-category" class="viewer-category"></span>
-
-        <h2 id="viewer-title"></h2>
-
-        <p id="viewer-location" class="viewer-location"></p>
-
-        <div class="viewer-meta">
-          <p>
-            <strong>Lens:</strong>
-            <span id="viewer-lens"></span>
-          </p>
+      <!-- GALLERY SECTION -->
+      <section class="gallery-section">
+        <div class="section-header">
+          <h2>Gallery</h2>
+          <span id="moment-count">0 moments</span>
         </div>
 
-        <div class="viewer-notes-box">
-          <h3>Field Notes</h3>
-          <p id="viewer-notes"></p>
+        <!-- SEARCH + FILTER -->
+        <div class="gallery-controls">
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Search moments..."
+          />
+
+          <select id="filter-category">
+            <option value="all">All Categories</option>
+            <option value="aurora">Aurora</option>
+            <option value="street">Street</option>
+            <option value="snow">Snow</option>
+            <option value="reflection">Reflection</option>
+            <option value="portrait">Portrait</option>
+            <option value="rain">Rain</option>
+          </select>
+        </div>
+
+        <!-- PHOTO CARDS RENDER HERE -->
+        <div class="gallery-grid" id="gallery-grid"></div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">📸</div>
+          <h3>No moments found</h3>
+          <p>Try another search term or choose a different category.</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- FULLSCREEN VIEWER -->
+    <div class="photo-viewer" id="photo-viewer">
+      <button class="viewer-close-btn" id="viewer-close-btn">✕</button>
+
+      <div class="viewer-content">
+        <img id="viewer-image" src="" alt="" />
+
+        <div class="viewer-info">
+          <span id="viewer-category" class="viewer-category"></span>
+
+          <h2 id="viewer-title"></h2>
+
+          <p id="viewer-location" class="viewer-location"></p>
+
+          <div class="viewer-meta">
+            <p>
+              <strong>Lens:</strong>
+              <span id="viewer-lens"></span>
+            </p>
+          </div>
+
+          <div class="viewer-notes-box">
+            <h3>Field Notes</h3>
+            <p id="viewer-notes"></p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- MOBILE BOTTOM NAVIGATION -->
-  <nav class="bottom-nav">
-    <button class="nav-item active" data-section="home">
-      <span>🏠</span>
-      <small>Home</small>
-    </button>
+    <button class="floating-add-btn" id="floating-add-btn">+</button>
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-section="home">
+        <span>🏠</span>
+        <small>Home</small>
+      </button>
 
-    <button class="nav-item" data-section="gallery">
-      <span>🖼️</span>
-      <small>Gallery</small>
-    </button>
+      <button class="nav-item" data-section="gallery">
+        <span>🖼️</span>
+        <small>Gallery</small>
+      </button>
 
-    <button class="nav-item" data-section="favorites">
-      <span>⭐</span>
-      <small>Favorites</small>
-    </button>
+      <button class="nav-item" data-section="favorites">
+        <span>⭐</span>
+        <small>Favorites</small>
+      </button>
 
-    <button class="nav-item" data-section="notes">
-      <span>📝</span>
-      <small>Notes</small>
-    </button>
+      <button class="nav-item" data-section="notes">
+        <span>📝</span>
+        <small>Notes</small>
+      </button>
 
-    <button class="nav-item" data-section="settings">
-      <span>⚙️</span>
-      <small>Settings</small>
-    </button>
-  </nav>
+      <button class="nav-item" data-section="settings">
+        <span>⚙️</span>
+        <small>Settings</small>
+      </button>
+    </nav>
 
-  <!-- JS -->
-  <script src="js/script.js"></script>
-</body>
+    <!-- JS -->
+    <script src="js/script.js"></script>
+  </body>
 </html>

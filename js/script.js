@@ -44,6 +44,7 @@ const viewerCategory = document.getElementById("viewer-category");
 
 // Bottom navigation
 const navItems = document.querySelectorAll(".nav-item");
+const floatingAddBtn = document.getElementById("floating-add-btn");
 
 // =========================
 // SAMPLE DATA
@@ -516,7 +517,25 @@ function setupBottomNavigation() {
     });
   });
 }
+setupFloatingButton();
 
+function setupFloatingButton() {
+  floatingAddBtn.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+    titleInput.focus();
+
+    titleInput.style.boxShadow =
+      "0 0 0 4px rgba(95,255,178,0.25)";
+
+    setTimeout(() => {
+      titleInput.style.boxShadow = "none";
+    }, 1200);
+  });
+}
 // =========================
 // EVENT LISTENERS
 // =========================
