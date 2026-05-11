@@ -1,7 +1,3 @@
-/* =========================
-   DESIGN SYSTEM
-========================= */
-
 :root {
   --bg-main: #0b0f19;
   --bg-card: #121826;
@@ -17,15 +13,9 @@
   --danger: #ff6b6b;
 
   --radius-lg: 24px;
-  --radius-md: 18px;
-
   --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.25);
-  --shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.35);
+  --shadow-hover: 0 22px 60px rgba(0, 0, 0, 0.45);
 }
-
-/* =========================
-   BASE
-========================= */
 
 * {
   box-sizing: border-box;
@@ -59,15 +49,10 @@ textarea {
   font-family: inherit;
 }
 
-/* =========================
-   APP LAYOUT
-========================= */
-
 .app-shell {
   width: min(1100px, 100%);
   margin: 0 auto;
   padding: 28px 18px;
-  animation: appFadeIn 0.6s ease;
 }
 
 .app-header {
@@ -84,19 +69,13 @@ textarea {
 
 .app-header h1 {
   font-size: 34px;
-  line-height: 1.1;
   margin-bottom: 10px;
 }
 
 .header-text {
   color: var(--text-soft);
   font-size: 15px;
-  line-height: 1.6;
 }
-
-/* =========================
-   FORM
-========================= */
 
 .form-card {
   background: var(--glass);
@@ -109,7 +88,6 @@ textarea {
 }
 
 .form-card h2 {
-  font-size: 22px;
   margin-bottom: 16px;
 }
 
@@ -128,7 +106,6 @@ textarea {
   border-radius: 16px;
   padding: 13px 14px;
   outline: none;
-  transition: 0.25s ease;
 }
 
 input::placeholder,
@@ -136,46 +113,39 @@ textarea::placeholder {
   color: var(--text-muted);
 }
 
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: rgba(127, 214, 255, 0.55);
-  box-shadow: 0 0 0 4px rgba(127, 214, 255, 0.08);
-}
-
 textarea {
   min-height: 90px;
   resize: vertical;
 }
 
-.primary-btn {
+.primary-btn,
+.secondary-btn {
   border: none;
   border-radius: 18px;
   padding: 14px;
-  color: #071016;
   font-weight: 700;
   cursor: pointer;
+}
+
+.primary-btn {
+  color: #071016;
   background: linear-gradient(135deg, var(--aurora), var(--ice));
-  transition: 0.25s ease;
 }
 
-.primary-btn:active {
-  transform: scale(0.96);
+.secondary-btn {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-/* =========================
-   GALLERY
-========================= */
+.hidden {
+  display: none;
+}
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 18px;
-}
-
-.section-header h2 {
-  font-size: 22px;
 }
 
 .section-header span {
@@ -196,40 +166,36 @@ textarea {
   gap: 18px;
 }
 
-/* =========================
-   PREMIUM PHOTO CARD
-========================= */
-
 .photo-card {
   position: relative;
   overflow: hidden;
-  min-height: 360px;
+  min-height: 380px;
   border-radius: var(--radius-lg);
   cursor: pointer;
-  box-shadow: var(--shadow-soft);
   background: var(--bg-card);
-  animation: cardFadeUp 0.45s ease both;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  box-shadow: var(--shadow-soft);
+  transition: 0.35s ease;
 }
 
 .photo-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-10px) scale(1.02);
   box-shadow: var(--shadow-hover);
 }
 
 .photo-card img {
   width: 100%;
   height: 100%;
-  min-height: 360px;
+  min-height: 380px;
   object-fit: cover;
   display: block;
-  transition: transform 0.4s ease;
+  transition:
+    transform 0.8s ease,
+    filter 0.8s ease;
 }
 
 .photo-card:hover img {
-  transform: scale(1.04);
+  transform: scale(1.08);
+  filter: brightness(1.08) contrast(1.05) saturate(1.08);
 }
 
 .card-overlay {
@@ -252,6 +218,15 @@ textarea {
   z-index: 2;
 }
 
+.category-badge {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .card-location {
   color: var(--ice);
   font-size: 11px;
@@ -262,7 +237,6 @@ textarea {
 
 .card-title {
   font-size: 20px;
-  line-height: 1.2;
   margin-bottom: 10px;
 }
 
@@ -271,95 +245,59 @@ textarea {
   font-size: 12px;
 }
 
-.category-badge {
-  display: inline-block;
-  margin-bottom: 10px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(14px);
-}
-
-/* =========================
-   CARD ACTION BUTTONS
-========================= */
-
 .favorite-btn,
 .edit-btn,
 .delete-btn {
   position: absolute;
   right: 14px;
-  z-index: 20;
-
-  width: 42px;
-  height: 42px;
-
-  border: none;
+  z-index: 30;
+  width: 52px;
+  height: 52px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
-
   background: rgba(5, 10, 20, 0.72);
   color: white;
-
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(18px);
   cursor: pointer;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
-  font-size: 14px;
-
-  font-weight: bold;
-
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.45),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
-
-  transition: all 0.25s ease;
+  font-size: 22px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  transition: 0.25s ease;
 }
 
 .favorite-btn {
-  top: 14px;
+  top: 16px;
 }
 
 .edit-btn {
-  top: 62px;
+  top: 78px;
 }
 
 .delete-btn {
-  top: 110px;
+  top: 140px;
 }
 
 .favorite-btn:hover,
 .edit-btn:hover,
 .delete-btn:hover {
-  transform: scale(1.08);
-  background: rgba(15, 25, 40, 0.92);
+  transform: scale(1.12);
 }
 
 .favorite-btn.active {
-  background: rgba(255, 184, 107, 0.22);
-  color: var(--warm);
-  box-shadow: 0 0 24px rgba(255, 184, 107, 0.35);
+  color: #ffcc66;
+  border-color: rgba(255, 204, 102, 0.6);
+  box-shadow: 0 0 20px rgba(255, 204, 102, 0.35);
 }
 
 .edit-btn:hover {
-  background: rgba(127, 214, 255, 0.22);
   color: var(--ice);
 }
 
 .delete-btn:hover {
-  background: rgba(255, 107, 107, 0.22);
   color: var(--danger);
 }
-
-/* =========================
-   EMPTY STATE
-========================= */
 
 .empty-state {
   display: none;
@@ -367,14 +305,11 @@ textarea {
   padding: 48px 24px;
   border-radius: var(--radius-lg);
   background: var(--glass);
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-soft);
 }
 
 .empty-state.active {
   display: block;
-  animation: cardFadeUp 0.45s ease both;
 }
 
 .empty-icon {
@@ -384,99 +319,77 @@ textarea {
 
 .empty-state h3 {
   color: var(--text-main);
-  font-size: 22px;
   margin-bottom: 8px;
 }
-
-.empty-state p {
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-/* =========================
-   FULLSCREEN VIEWER
-========================= */
 
 .photo-viewer {
   position: fixed;
   inset: 0;
-  background: rgba(5, 8, 15, 0.92);
+  background: rgba(3, 6, 14, 0.92);
   backdrop-filter: blur(24px);
-  z-index: 999;
-  display: none;
-  align-items: center;
+  z-index: 9999;
+  display: flex;
   justify-content: center;
-  padding: 24px;
+  align-items: center;
+  padding: 30px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
 }
 
 .photo-viewer.active {
-  display: flex;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .viewer-content {
-  width: min(1100px, 95%);
-  max-height: 92vh;
-  overflow-y: auto;
-  background: rgba(10, 15, 28, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 28px;
-  animation: viewerOpen 0.35s ease;
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  align-items: center;
 }
 
-.viewer-content img {
+#viewer-image {
   width: 100%;
-  max-height: 65vh;
+  max-height: 85vh;
   object-fit: cover;
-  border-top-left-radius: 28px;
-  border-top-right-radius: 28px;
-  display: block;
+  border-radius: 28px;
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55);
 }
 
 .viewer-info {
-  padding: 28px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .viewer-category {
-  display: inline-block;
-  padding: 6px 12px;
+  width: fit-content;
+  padding: 8px 14px;
   border-radius: 999px;
-  background: rgba(127, 214, 255, 0.12);
-  color: var(--ice);
+  background: rgba(255, 255, 255, 0.08);
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  margin-bottom: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
-.viewer-info h2 {
-  font-size: 34px;
-  margin-bottom: 10px;
-  color: var(--text-main);
+#viewer-title {
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 1.05;
 }
 
 .viewer-location {
-  color: var(--text-soft);
-  margin-bottom: 24px;
+  color: rgba(255, 255, 255, 0.7);
 }
 
-.viewer-meta {
-  margin-bottom: 24px;
-}
-
-.viewer-meta p {
-  color: var(--text-soft);
-}
-
+.viewer-meta,
 .viewer-notes-box {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 20px;
-  padding: 20px;
-}
-
-.viewer-notes-box h3 {
-  margin-bottom: 12px;
-  color: var(--text-main);
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .viewer-notes-box p {
@@ -485,38 +398,19 @@ textarea {
 }
 
 .viewer-close-btn {
-  position: fixed;
-  top: 18px;
-  right: 18px;
-  z-index: 1000;
-
-  width: 44px;
-  height: 44px;
-
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  width: 56px;
+  height: 56px;
   border: none;
   border-radius: 50%;
-
   background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-
-  font-size: 26px;
+  color: white;
+  font-size: 22px;
   cursor: pointer;
-
-  backdrop-filter: blur(16px);
-  transition: 0.25s ease;
+  z-index: 50;
 }
-
-.viewer-close-btn:active {
-  transform: scale(0.96);
-}
-
-.photo-viewer.closing .viewer-content {
-  animation: viewerClose 0.25s ease forwards;
-}
-
-/* =========================
-   BOTTOM NAVIGATION
-========================= */
 
 .bottom-nav {
   position: fixed;
@@ -525,11 +419,9 @@ textarea {
   bottom: 16px;
   height: 72px;
   z-index: 900;
-
   display: flex;
   justify-content: space-around;
   align-items: center;
-
   background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(22px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -542,25 +434,13 @@ textarea {
   background: transparent;
   color: var(--text-soft);
   cursor: pointer;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-
   min-width: 54px;
   padding: 8px 6px;
   border-radius: 18px;
-
-  transition: 0.25s ease;
-}
-
-.nav-item span {
-  font-size: 21px;
-}
-
-.nav-item small {
-  font-size: 11px;
 }
 
 .nav-item.active {
@@ -568,115 +448,109 @@ textarea {
   background: rgba(255, 255, 255, 0.09);
 }
 
-.nav-item:hover {
-  color: var(--ice);
-  transform: translateY(-2px);
-}
-
-.nav-item:active {
-  transform: scale(0.96);
-}
-
-/* =========================
-   ANIMATIONS
-========================= */
-
-@keyframes appFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
+@media (max-width: 768px) {
+  .gallery-controls {
+    grid-template-columns: 1fr;
   }
 
+  .viewer-content {
+    grid-template-columns: 1fr;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  #viewer-image {
+    max-height: 50vh;
+  }
+}
+
+/* ========================= */
+/* CARD ENTRY ANIMATION */
+/* ========================= */
+
+.photo-card {
+  animation: cardFade 0.7s ease forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@keyframes cardFade {
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-@keyframes cardFadeUp {
+/* ========================= */
+/* GLASS SHIMMER */
+/* ========================= */
+
+.photo-card::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  left: -120%;
+
+  width: 80%;
+  height: 100%;
+
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.12),
+    transparent
+  );
+
+  z-index: 5;
+
+  transition: 0.8s;
+}
+
+.photo-card:hover::before {
+  left: 130%;
+}
+
+/* ========================= */
+/* IMAGE CINEMATIC ZOOM */
+/* ========================= */
+
+.photo-card img {
+  transition:
+    transform 1.4s ease,
+    filter 1s ease;
+}
+
+.photo-card:hover img {
+  transform: scale(1.08);
+
+  filter: brightness(1.05) contrast(1.08) saturate(1.1);
+}
+
+/* ========================= */
+/* CATEGORY GLOW */
+/* ========================= */
+
+.category-badge {
+  box-shadow: 0 0 18px rgba(95, 255, 178, 0.18);
+}
+
+/* ========================= */
+/* APP FADE IN */
+/* ========================= */
+
+.app-shell {
+  animation: appStart 1s ease;
+}
+
+@keyframes appStart {
   from {
     opacity: 0;
-    transform: translateY(18px) scale(0.98);
+    transform: translateY(20px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
-}
-
-@keyframes viewerOpen {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(18px);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes viewerClose {
-  from {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-
-  to {
-    opacity: 0;
-    transform: scale(0.96) translateY(16px);
-  }
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 768px) {
-  .gallery-controls {
-    grid-template-columns: 1fr;
-  }
-
-  .viewer-info h2 {
-    font-size: 26px;
-  }
-
-  .viewer-content img {
-    max-height: 45vh;
-  }
-
-  .viewer-info {
-    padding: 20px;
-  }
-}
-
-@media (max-width: 600px) {
-  .app-header h1 {
-    font-size: 30px;
-  }
-
-  .photo-card,
-  .photo-card img {
-    min-height: 420px;
-  }
-}
-
-.secondary-btn {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 18px;
-  padding: 14px;
-  color: var(--text-main);
-  font-weight: 700;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.06);
-  transition: 0.25s ease;
-}
-
-.secondary-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.hidden {
-  display: none;
 }

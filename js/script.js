@@ -3,7 +3,6 @@
 // =========================
 
 let moments = [];
-
 let editingMomentId = null;
 
 const STORAGE_KEY = "photo-moments-app-data";
@@ -20,6 +19,8 @@ const imageInput = document.getElementById("image-input");
 const categoryInput = document.getElementById("category-input");
 const lensInput = document.getElementById("lens-input");
 const notesInput = document.getElementById("notes-input");
+const submitBtn = document.getElementById("submit-btn");
+const cancelEditBtn = document.getElementById("cancel-edit-btn");
 
 // Gallery
 const galleryGrid = document.getElementById("gallery-grid");
@@ -41,8 +42,6 @@ const viewerLens = document.getElementById("viewer-lens");
 const viewerNotes = document.getElementById("viewer-notes");
 const viewerCategory = document.getElementById("viewer-category");
 
-const submitBtn = document.getElementById("submit-btn");
-const cancelEditBtn = document.getElementById("cancel-edit-btn");
 // Bottom navigation
 const navItems = document.querySelectorAll(".nav-item");
 
@@ -145,7 +144,8 @@ function renderMoments() {
       lens.toLowerCase().includes(searchTerm);
 
     const matchesCategory =
-      selectedCategory === "all" || category.toLowerCase() === selectedCategory;
+      selectedCategory === "all" ||
+      category.toLowerCase() === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -172,15 +172,24 @@ function renderMoments() {
       <button
         class="favorite-btn ${moment.favorite ? "active" : ""}"
         data-id="${moment.id}"
+        aria-label="Toggle favorite"
       >
         ★
       </button>
 
-      <button class="edit-btn" data-id="${moment.id}">
-  ✎
-</button>
+      <button
+        class="edit-btn"
+        data-id="${moment.id}"
+        aria-label="Edit moment"
+      >
+        ✎
+      </button>
 
-      <button class="delete-btn" data-id="${moment.id}">
+      <button
+        class="delete-btn"
+        data-id="${moment.id}"
+        aria-label="Delete moment"
+      >
         🗑
       </button>
 
@@ -194,32 +203,24 @@ function renderMoments() {
       </div>
     `;
 
-    // Favorite button
     const favoriteBtn = card.querySelector(".favorite-btn");
-
     favoriteBtn.addEventListener("click", (event) => {
       event.stopPropagation();
       toggleFavorite(moment.id);
     });
 
-    // Edit button
     const editBtn = card.querySelector(".edit-btn");
-
     editBtn.addEventListener("click", (event) => {
       event.stopPropagation();
       startEditMoment(moment.id);
-      cancelEditBtn.classList.remove("hidden");
     });
 
-    // Delete button
     const deleteBtn = card.querySelector(".delete-btn");
-
     deleteBtn.addEventListener("click", (event) => {
       event.stopPropagation();
       deleteMoment(moment.id);
     });
 
-    // Open fullscreen viewer
     card.addEventListener("click", () => {
       openPhotoViewer(moment);
     });
@@ -229,7 +230,7 @@ function renderMoments() {
 }
 
 // =========================
-// ADD MOMENT
+// ADD / UPDATE MOMENT
 // =========================
 
 function addMoment(event) {
@@ -270,15 +271,14 @@ function addMoment(event) {
 
   saveMoments();
   renderMoments();
+
   momentForm.reset();
   submitBtn.textContent = "Add Moment";
   cancelEditBtn.classList.add("hidden");
 }
 
 // =========================
-
 // EDIT MOMENT
-
 // =========================
 
 function startEditMoment(id) {
@@ -289,32 +289,26 @@ function startEditMoment(id) {
   editingMomentId = id;
 
   titleInput.value = momentToEdit.title;
-
   locationInput.value = momentToEdit.location;
-
   imageInput.value = momentToEdit.image;
-
   categoryInput.value = momentToEdit.category;
-
   lensInput.value = momentToEdit.lens;
-
   notesInput.value = momentToEdit.notes;
 
   submitBtn.textContent = "Update Moment";
+  cancelEditBtn.classList.remove("hidden");
 
   window.scrollTo({
     top: 0,
-
     behavior: "smooth",
   });
 }
 
-// =========================
-// CANCEL SYSTEM
-// =========================
 function cancelEditMoment() {
   editingMomentId = null;
+
   momentForm.reset();
+
   submitBtn.textContent = "Add Moment";
   cancelEditBtn.classList.add("hidden");
 }
@@ -350,6 +344,10 @@ function deleteMoment(id) {
 
   moments = moments.filter((moment) => moment.id !== id);
 
+  if (editingMomentId === id) {
+    cancelEditMoment();
+  }
+
   saveMoments();
   renderMoments();
 }
@@ -369,7 +367,6 @@ function openPhotoViewer(moment) {
   viewerCategory.textContent = moment.category || "Uncategorized";
 
   photoViewer.classList.add("active");
-
   document.body.style.overflow = "hidden";
 }
 
@@ -405,6 +402,7 @@ function setupBottomNavigation() {
 // =========================
 
 momentForm.addEventListener("submit", addMoment);
+cancelEditBtn.addEventListener("click", cancelEditMoment);
 
 searchInput.addEventListener("input", renderMoments);
 filterCategory.addEventListener("change", renderMoments);
@@ -422,7 +420,7 @@ document.addEventListener("keydown", (event) => {
     closePhotoViewer();
   }
 });
-cancelEditBtn.addEventListener("click", cancelEditMoment);
+
 // =========================
 // INIT APP
 // =========================
