@@ -14,6 +14,8 @@ let exifDetected = false;
 
 let deferredPrompt;
 
+let compactView = false;
+
 // =========================
 // STORAGE
 // =========================
@@ -141,12 +143,6 @@ const assistantOutput = document.getElementById("assistant-output");
 const lensAdvice = document.getElementById("lens-advice");
 
 const weatherAdvice = document.getElementById("weather-advice");
-
-// AURORA
-
-const auroraChecks = document.querySelectorAll(".aurora-card input");
-
-const auroraStatus = document.getElementById("aurora-status");
 
 // SETTINGS
 
@@ -748,6 +744,14 @@ function addOrUpdateMoment(event) {
   resetForm();
 }
 
+function toggleGalleryView() {
+  compactView = !compactView;
+
+  galleryGrid.classList.toggle("compact-view", compactView);
+
+  viewToggleBtn.textContent = compactView ? "Grid View" : "Compact View";
+}
+
 // =========================
 // RENDER
 // =========================
@@ -1079,24 +1083,6 @@ function updateAssistant() {
 }
 
 // =========================
-// AURORA
-// =========================
-
-function updateAuroraReadiness() {
-  const allReady = [...auroraChecks].every((check) => check.checked);
-
-  if (allReady) {
-    auroraStatus.textContent = "Ready for Aurora shooting.";
-
-    auroraStatus.classList.add("ready");
-  } else {
-    auroraStatus.textContent = "Not ready yet.";
-
-    auroraStatus.classList.remove("ready");
-  }
-}
-
-// =========================
 // SETTINGS
 // =========================
 
@@ -1247,7 +1233,7 @@ function setupNavigation() {
 // =========================
 // EVENTS
 // =========================
-
+viewToggleBtn.addEventListener("click", toggleGalleryView);
 // FORM
 
 momentForm.addEventListener("submit", addOrUpdateMoment);
@@ -1308,12 +1294,6 @@ viewerPrevBtn.addEventListener("click", showPreviousMoment);
 
 assistantScenario.addEventListener("change", updateAssistant);
 
-// AURORA
-
-auroraChecks.forEach((check) => {
-  check.addEventListener("change", updateAuroraReadiness);
-});
-
 // SETTINGS
 
 clearDataBtn.addEventListener("click", clearAllMoments);
@@ -1370,8 +1350,6 @@ function initApp() {
   updateStats();
 
   updateAssistant();
-
-  updateAuroraReadiness();
 
   updateSettingsStatus("manual");
 
