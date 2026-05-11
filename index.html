@@ -1,15 +1,18 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Basic document setup -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Photo Moments App</title>
 
+    <!-- PWA / App icons -->
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/png" href="icons/icon-192.png" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
+    <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
@@ -18,19 +21,25 @@
       rel="stylesheet"
     />
 
+    <!-- Main CSS -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
 
   <body>
+    <!-- Main app content -->
     <main class="app-shell">
+      <!-- HEADER -->
       <header class="app-header" id="home-section">
         <p class="eyebrow">Cinematic Photography Journal</p>
+
         <h1>📸 Photo Moments</h1>
+
         <p class="header-text">
-          Save your photos, trips, camera settings and field notes.
+          Save your photos, trips, camera settings, EXIF data and field notes.
         </p>
       </header>
 
+      <!-- ADD / EDIT FORM -->
       <section class="form-card" id="add-section">
         <div class="section-header">
           <h2 id="form-title">Add New Moment</h2>
@@ -38,6 +47,7 @@
         </div>
 
         <form id="moment-form">
+          <!-- Basic metadata -->
           <input id="title-input" type="text" placeholder="Title" required />
 
           <input
@@ -54,103 +64,105 @@
 
           <input id="date-input" type="date" />
 
+          <!-- Local image picker -->
           <label class="file-label">
             <span>Choose photo from Finder / iPhone</span>
             <input id="file-input" type="file" accept="image/*" />
           </label>
 
+          <!-- EXIF status -->
+          <p class="exif-status" id="exif-status">No photo selected yet.</p>
+
+          <!-- Alternative image URL -->
           <input id="image-input" type="url" placeholder="Or paste Image URL" />
 
+          <!-- Image preview -->
+          <div class="image-preview hidden" id="image-preview">
+            <button
+              type="button"
+              class="remove-image-btn"
+              id="remove-image-btn"
+            >
+              ✕
+            </button>
+
+            <img id="preview-image" src="" alt="Selected preview" />
+          </div>
+
+          <!-- Category controls preset behavior -->
           <select id="category-input">
             <option value="Aurora">Aurora</option>
             <option value="Snow">Snow</option>
             <option value="Rain">Rain</option>
             <option value="Street">Street</option>
+            <option value="Street Night">Street Night</option>
             <option value="Reflection">Reflection</option>
             <option value="Portrait">Portrait</option>
             <option value="Blue Hour">Blue Hour</option>
             <option value="Husky">Husky</option>
           </select>
 
+          <!-- Camera settings / EXIF fields -->
           <div class="settings-grid">
-            <select id="camera-input">
-              <option value="Nikon Z50">Nikon Z50</option>
-              <option value="iPhone">iPhone</option>
-              <option value="Other Camera">Other Camera</option>
-            </select>
+            <input
+              id="camera-input"
+              type="text"
+              placeholder="Camera e.g. Nikon Z50"
+            />
 
-            <select id="lens-input">
-              <option value="Viltrox 13mm f/1.4">Viltrox 13mm f/1.4</option>
-              <option value="DX 12-28mm">DX 12-28mm</option>
-              <option value="DX 16-50mm">DX 16-50mm</option>
-              <option value="DX 16-50mm @ 40mm">DX 16-50mm @ 40mm</option>
-              <option value="DX 50-250mm">DX 50-250mm</option>
-              <option value="iPhone Camera">iPhone Camera</option>
-            </select>
+            <input
+              id="lens-input"
+              type="text"
+              placeholder="Lens e.g. DX 16-50mm"
+            />
 
-            <select id="aperture-input">
-              <option value="f/1.8">f/1.8</option>
-              <option value="f/2.8">f/2.8</option>
-              <option value="f/4">f/4</option>
-              <option value="f/5.6">f/5.6</option>
-              <option value="f/8">f/8</option>
-              <option value="f/11">f/11</option>
-            </select>
+            <input
+              id="aperture-input"
+              type="text"
+              placeholder="Aperture e.g. f/5.6"
+            />
 
-            <select id="shutter-input">
-              <option value="1s">1s</option>
-              <option value="2s">2s</option>
-              <option value="6s">6s</option>
-              <option value="1/30s">1/30s</option>
-              <option value="1/125s">1/125s</option>
-              <option value="1/250s">1/250s</option>
-              <option value="1/500s">1/500s</option>
-              <option value="1/1000s">1/1000s</option>
-            </select>
+            <input
+              id="shutter-input"
+              type="text"
+              placeholder="Shutter e.g. 1/250s"
+            />
 
-            <select id="iso-input">
-              <option value="100">ISO 100</option>
-              <option value="200">ISO 200</option>
-              <option value="400">ISO 400</option>
-              <option value="800">ISO 800</option>
-              <option value="1600">ISO 1600</option>
-              <option value="3200">ISO 3200</option>
-              <option value="Auto">ISO Auto</option>
-            </select>
+            <input id="iso-input" type="text" placeholder="ISO e.g. 1600" />
 
-            <select id="wb-input">
-              <option value="4000K">4000K</option>
-              <option value="3800K">3800K</option>
-              <option value="4200K">4200K</option>
-              <option value="Cloudy">Cloudy</option>
-              <option value="Auto">Auto</option>
-            </select>
+            <input
+              id="wb-input"
+              type="text"
+              placeholder="White Balance e.g. 4000K"
+            />
           </div>
 
-          <div class="preset-buttons">
-            <button type="button" class="preset-btn" data-preset="aurora">
-              Aurora
-            </button>
+          <!-- Camera settings actions -->
+          <button type="button" class="secondary-btn" id="clear-settings-btn">
+            Clear Camera Settings
+          </button>
 
-            <button type="button" class="preset-btn" data-preset="snow">
-              Snow
-            </button>
+          <button type="button" class="secondary-btn" id="force-preset-btn">
+            Apply Category Preset Anyway
+          </button>
 
-            <button type="button" class="preset-btn" data-preset="bluehour">
-              Blue Hour
-            </button>
+          <!-- Settings feedback -->
+          <p class="settings-status manual" id="settings-status">
+            Manual settings
+          </p>
 
-            <button type="button" class="preset-btn" data-preset="rain">
-              Rain
-            </button>
+          <p class="metadata-score weak" id="metadata-score">
+            Metadata: 0% complete
+          </p>
 
-            <button type="button" class="preset-btn" data-preset="husky">
-              Husky
-            </button>
-          </div>
+          <p class="missing-fields" id="missing-fields">
+            Missing: title, image
+          </p>
 
+          <!-- Free notes -->
           <textarea id="notes-input" placeholder="Field notes"></textarea>
 
+          <!-- Save buttons -->
           <button type="submit" class="primary-btn" id="submit-btn">
             Add Moment
           </button>
@@ -165,6 +177,7 @@
         </form>
       </section>
 
+      <!-- STATS DASHBOARD -->
       <section class="stats-grid" id="stats-section">
         <article class="stat-card">
           <p class="stat-label">Total Moments</p>
@@ -187,6 +200,7 @@
         </article>
       </section>
 
+      <!-- AI SHOOTING ASSISTANT -->
       <section class="assistant-section" id="assistant-section">
         <div class="section-header">
           <h2>AI Shooting Assistant</h2>
@@ -208,6 +222,7 @@
         </div>
       </section>
 
+      <!-- AURORA READINESS CHECKLIST -->
       <section class="aurora-readiness-section" id="aurora-section">
         <div class="section-header">
           <h2>Aurora Readiness</h2>
@@ -239,6 +254,7 @@
         </div>
       </section>
 
+      <!-- GALLERY -->
       <section class="gallery-section" id="gallery-section">
         <div class="section-header">
           <h2 id="gallery-title">Gallery</h2>
@@ -258,10 +274,18 @@
             <option value="snow">Snow</option>
             <option value="rain">Rain</option>
             <option value="street">Street</option>
+            <option value="street night">Street Night</option>
             <option value="reflection">Reflection</option>
             <option value="portrait">Portrait</option>
             <option value="blue hour">Blue Hour</option>
             <option value="husky">Husky</option>
+          </select>
+
+          <select id="sort-select">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="favorites">Favorites first</option>
+            <option value="category">Category A–Z</option>
           </select>
         </div>
 
@@ -274,6 +298,7 @@
         </div>
       </section>
 
+      <!-- SETTINGS -->
       <section class="settings-section" id="settings-section">
         <div class="section-header">
           <h2>Settings</h2>
@@ -282,8 +307,8 @@
 
         <div class="settings-card">
           <p>
-            Your moments are saved locally in this browser with
-            <strong>localStorage</strong>.
+            Metadata is saved in <strong>localStorage</strong>. Photos are saved
+            in <strong>IndexedDB</strong>.
           </p>
 
           <button class="danger-btn" id="clear-data-btn">
@@ -293,6 +318,7 @@
       </section>
     </main>
 
+    <!-- FULLSCREEN VIEWER -->
     <div class="photo-viewer" id="photo-viewer">
       <button class="viewer-close-btn" id="viewer-close-btn">✕</button>
 
@@ -315,8 +341,10 @@
       </div>
     </div>
 
+    <!-- FLOATING ADD BUTTON -->
     <button class="floating-add-btn" id="floating-add-btn">+</button>
 
+    <!-- BOTTOM NAVIGATION -->
     <nav class="bottom-nav">
       <button class="nav-item active" data-tab="gallery">
         <span>📸</span>
@@ -344,6 +372,7 @@
       </button>
     </nav>
 
+    <!-- Scripts: EXIF first, DB second, app last -->
     <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
     <script src="js/image-db.js"></script>
     <script src="js/script.js"></script>

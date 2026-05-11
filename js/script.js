@@ -2,115 +2,168 @@
 // STATE
 // =========================
 
-// Main app data
 let moments = [];
 
-// Used when editing an existing moment
 let editingMomentId = null;
 
-// Used by fullscreen viewer navigation
 let currentViewerIndex = 0;
 
-// Current gallery mode: "gallery" or "favorites"
-let currentView = "gallery";
-
-// Selected image file from Finder/iPhone.
-// Important: the real file is saved in IndexedDB, not localStorage.
 let selectedImageFile = null;
 
-// Touch positions for swipe gestures
-let touchStartX = 0;
-let touchEndX = 0;
+let exifDetected = false;
 
-// localStorage stores only metadata
+let deferredPrompt;
+
+// =========================
+// STORAGE
+// =========================
+
 const STORAGE_KEY = "photo-moments-app-data";
 
 // =========================
 // SELECTORS
 // =========================
 
-// Form
+// FORM
+
 const momentForm = document.getElementById("moment-form");
+
 const formTitle = document.getElementById("form-title");
 
 const titleInput = document.getElementById("title-input");
+
 const locationInput = document.getElementById("location-input");
+
 const tripInput = document.getElementById("trip-input");
+
 const dateInput = document.getElementById("date-input");
 
 const fileInput = document.getElementById("file-input");
+
 const imageInput = document.getElementById("image-input");
 
 const categoryInput = document.getElementById("category-input");
+
 const cameraInput = document.getElementById("camera-input");
+
 const lensInput = document.getElementById("lens-input");
+
 const apertureInput = document.getElementById("aperture-input");
+
 const shutterInput = document.getElementById("shutter-input");
+
 const isoInput = document.getElementById("iso-input");
+
 const wbInput = document.getElementById("wb-input");
 
 const notesInput = document.getElementById("notes-input");
 
 const submitBtn = document.getElementById("submit-btn");
+
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 
-// Stats
-const totalStat = document.getElementById("total-stat");
-const favoriteStat = document.getElementById("favorite-stat");
-const categoryStat = document.getElementById("category-stat");
-const norwayStat = document.getElementById("norway-stat");
+// STATUS
 
-// Assistant
-const assistantScenario = document.getElementById("assistant-scenario");
-const assistantOutput = document.getElementById("assistant-output");
-const lensAdvice = document.getElementById("lens-advice");
-const weatherAdvice = document.getElementById("weather-advice");
+const exifStatus = document.getElementById("exif-status");
 
-// Aurora checklist
-const auroraChecks = document.querySelectorAll(".aurora-card input");
-const auroraStatus = document.getElementById("aurora-status");
+const settingsStatus = document.getElementById("settings-status");
 
-// Gallery
-const galleryTitle = document.getElementById("gallery-title");
+const metadataScore = document.getElementById("metadata-score");
+
+const missingFields = document.getElementById("missing-fields");
+
+// IMAGE PREVIEW
+
+const imagePreview = document.getElementById("image-preview");
+
+const previewImage = document.getElementById("preview-image");
+
+const removeImageBtn = document.getElementById("remove-image-btn");
+
+// SETTINGS ACTIONS
+
+const clearSettingsBtn = document.getElementById("clear-settings-btn");
+
+const forcePresetBtn = document.getElementById("force-preset-btn");
+
+// GALLERY
+
 const galleryGrid = document.getElementById("gallery-grid");
+
 const momentCount = document.getElementById("moment-count");
-const emptyState = document.getElementById("empty-state");
+
 const searchInput = document.getElementById("search-input");
+
 const filterCategory = document.getElementById("filter-category");
 
-// Viewer
+const emptyState = document.getElementById("empty-state");
+
+const sortSelect = document.getElementById("sort-select");
+
+// STATS
+
+const totalStat = document.getElementById("total-stat");
+
+const favoriteStat = document.getElementById("favorite-stat");
+
+const categoryStat = document.getElementById("category-stat");
+
+const norwayStat = document.getElementById("norway-stat");
+
+// VIEWER
+
 const photoViewer = document.getElementById("photo-viewer");
-const viewerCloseBtn = document.getElementById("viewer-close-btn");
-const viewerPrevBtn = document.getElementById("viewer-prev-btn");
-const viewerNextBtn = document.getElementById("viewer-next-btn");
 
 const viewerImage = document.getElementById("viewer-image");
-const viewerCategory = document.getElementById("viewer-category");
+
 const viewerTitle = document.getElementById("viewer-title");
+
+const viewerCategory = document.getElementById("viewer-category");
+
 const viewerLocation = document.getElementById("viewer-location");
+
 const viewerMeta = document.getElementById("viewer-meta");
+
 const viewerNotes = document.getElementById("viewer-notes");
 
-// Navigation / buttons
-const navItems = document.querySelectorAll(".nav-item");
-const floatingAddBtn = document.getElementById("floating-add-btn");
-const presetButtons = document.querySelectorAll(".preset-btn");
+const viewerCloseBtn = document.getElementById("viewer-close-btn");
+
+const viewerPrevBtn = document.getElementById("viewer-prev-btn");
+
+const viewerNextBtn = document.getElementById("viewer-next-btn");
+
+// ASSISTANT
+
+const assistantScenario = document.getElementById("assistant-scenario");
+
+const assistantOutput = document.getElementById("assistant-output");
+
+const lensAdvice = document.getElementById("lens-advice");
+
+const weatherAdvice = document.getElementById("weather-advice");
+
+// AURORA
+
+const auroraChecks = document.querySelectorAll(".aurora-card input");
+
+const auroraStatus = document.getElementById("aurora-status");
+
+// SETTINGS
+
 const clearDataBtn = document.getElementById("clear-data-btn");
 
+// NAVIGATION
+
+const navItems = document.querySelectorAll(".nav-item");
+
+const floatingAddBtn = document.getElementById("floating-add-btn");
+
 // =========================
-// SAMPLE DATA
+// PRESET LIBRARY
 // =========================
 
-const sampleMoments = [
-  {
-    id: crypto.randomUUID(),
-    title: "Aurora over Tromsø Fjord",
-    location: "Tromsø • Norway",
-    trip: "Tromsø Aurora Expedition",
-    date: "2026-02-12",
-    image:
-      "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1200&q=80",
-    imageStorage: "url",
+const presetLibrary = {
+  aurora: {
     category: "Aurora",
     camera: "Nikon Z50",
     lens: "Viltrox 13mm f/1.4",
@@ -119,44 +172,99 @@ const sampleMoments = [
     iso: "1600",
     wb: "4000K",
     notes: "Tripod • Manual Focus • RAW",
-    favorite: true,
   },
-  {
-    id: crypto.randomUUID(),
-    title: "Snow Street Mood",
-    location: "Lofoten • Norway",
-    trip: "Lofoten Winter Journey",
-    date: "2026-02-13",
-    image:
-      "https://images.unsplash.com/photo-1516431883659-655d41c09bf9?auto=format&fit=crop&w=1200&q=80",
-    imageStorage: "url",
+
+  snow: {
     category: "Snow",
     camera: "Nikon Z50",
-    lens: "DX 16-50mm @ 40mm",
+    lens: "DX 16-50mm",
     aperture: "f/5.6",
     shutter: "1/250s",
     iso: "Auto",
     wb: "Cloudy",
-    notes: "Snow street mood • Watch highlights",
-    favorite: false,
+    notes: "Protect highlights in snow.",
   },
-  {
-    id: crypto.randomUUID(),
-    title: "Harbor Lights Reflection",
-    location: "Svolvær • Norway",
-    trip: "Lofoten Harbor Walk",
-    date: "2026-02-14",
-    image:
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
-    imageStorage: "url",
-    category: "Reflection",
+
+  rain: {
+    category: "Rain",
+    camera: "Nikon Z50",
+    lens: "DX 16-50mm",
+    aperture: "f/5.6",
+    shutter: "1/250s",
+    iso: "Auto",
+    wb: "Cloudy",
+    notes: "Use reflections and wet streets.",
+  },
+
+  streetnight: {
+    category: "Street Night",
+    camera: "Nikon Z50",
+    lens: "DX 16-50mm",
+    aperture: "f/2.8",
+    shutter: "1/125s",
+    iso: "3200",
+    wb: "3800K",
+    notes: "Neon lights • Moody shadows",
+  },
+
+  bluehour: {
+    category: "Blue Hour",
     camera: "Nikon Z50",
     lens: "DX 12-28mm",
     aperture: "f/8",
     shutter: "6s",
     iso: "100",
     wb: "3800K",
-    notes: "Tripod • Blue hour • Reflection shot",
+    notes: "Tripod • Reflection shots",
+  },
+
+  husky: {
+    category: "Husky",
+    camera: "Nikon Z50",
+    lens: "DX 50-250mm",
+    aperture: "f/5.6",
+    shutter: "1/1000s",
+    iso: "Auto",
+    wb: "Cloudy",
+    notes: "AF-C • Burst mode",
+  },
+};
+
+// =========================
+// SAMPLE DATA
+// =========================
+
+const sampleMoments = [
+  {
+    id: crypto.randomUUID(),
+
+    title: "Aurora over Tromsø",
+
+    location: "Tromsø • Norway",
+
+    trip: "Aurora Expedition",
+
+    date: "2026-02-12",
+
+    image:
+      "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1200&q=80",
+
+    category: "Aurora",
+
+    camera: "Nikon Z50",
+
+    lens: "Viltrox 13mm f/1.4",
+
+    aperture: "f/1.8",
+
+    shutter: "1s",
+
+    iso: "1600",
+
+    wb: "4000K",
+
+    notes: "Tripod • RAW",
+
     favorite: true,
   },
 ];
@@ -166,96 +274,166 @@ const sampleMoments = [
 // =========================
 
 function saveMoments() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(moments));
-  } catch (error) {
-    console.error("Storage error:", error);
-
-    alert(
-      "Storage is full. The app now stores images in IndexedDB, but old large base64 data may still exist. Please clear old data from Settings if needed.",
-    );
-  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(moments));
 }
 
 function loadMoments() {
   const saved = localStorage.getItem(STORAGE_KEY);
 
-  if (!saved) {
+  if (saved) {
+    moments = JSON.parse(saved);
+  } else {
     moments = sampleMoments;
+
     saveMoments();
-    return;
   }
+}
 
-  moments = JSON.parse(saved);
+// =========================
+// HELPERS
+// =========================
 
-  // Remove old broken base64 image records from previous localStorage version
-  moments = moments.filter((moment) => {
-    if (!moment.image) return false;
+function formatDate(dateString) {
+  if (!dateString) return "Unknown";
 
-    if (typeof moment.image === "string" && moment.image.startsWith("data:")) {
-      return false;
-    }
-
-    return true;
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
+}
 
-  if (moments.length === 0) {
-    moments = sampleMoments;
+function formatShutter(value) {
+  if (!value) return "";
+
+  if (value >= 1) {
+    return `${value}s`;
   }
 
-  saveMoments();
+  const denominator = Math.round(1 / value);
+
+  return `1/${denominator}s`;
+}
+
+function getPresetNameFromCategory(category) {
+  return category.toLowerCase().replaceAll(" ", "");
 }
 
 // =========================
-// IMAGE HANDLING
+// PRESET SYSTEM
 // =========================
 
-// This function returns the correct image source:
-// - URL images are used directly
-// - IndexedDB images are loaded from the image database
-async function getMomentImageSrc(moment) {
-  if (moment.imageStorage === "indexeddb") {
-    const imageRecord = await getImageFromDB(moment.image);
+function applyPreset(presetName) {
+  const preset = presetLibrary[presetName];
 
-    if (!imageRecord) return "";
+  if (!preset) return;
 
-    return URL.createObjectURL(imageRecord.file);
+  categoryInput.value = preset.category;
+
+  if (!cameraInput.value) {
+    cameraInput.value = preset.camera;
   }
 
-  return moment.image;
+  if (!lensInput.value) {
+    lensInput.value = preset.lens;
+  }
+
+  if (!apertureInput.value) {
+    apertureInput.value = preset.aperture;
+  }
+
+  if (!shutterInput.value) {
+    shutterInput.value = preset.shutter;
+  }
+
+  if (!isoInput.value) {
+    isoInput.value = preset.iso;
+  }
+
+  if (!wbInput.value) {
+    wbInput.value = preset.wb;
+  }
+
+  if (!notesInput.value) {
+    notesInput.value = preset.notes;
+  }
+
+  updateSettingsStatus("preset");
+
+  updateMetadataScore();
+
+  updateMissingFields();
 }
 
-// User chooses image from Finder/iPhone.
-// We do NOT convert it to base64 anymore.
-// We keep the File temporarily and save it to IndexedDB on submit.
+function forceApplyCurrentPreset() {
+  const presetName = getPresetNameFromCategory(categoryInput.value);
+
+  const preset = presetLibrary[presetName];
+
+  if (!preset) return;
+
+  cameraInput.value = preset.camera;
+
+  lensInput.value = preset.lens;
+
+  apertureInput.value = preset.aperture;
+
+  shutterInput.value = preset.shutter;
+
+  isoInput.value = preset.iso;
+
+  wbInput.value = preset.wb;
+
+  notesInput.value = preset.notes;
+
+  exifDetected = false;
+
+  updateSettingsStatus("preset");
+
+  updateMetadataScore();
+
+  updateMissingFields();
+}
+
+// =========================
+// EXIF
+// =========================
+
 async function handleFileUpload() {
   const file = fileInput.files[0];
 
   if (!file) return;
 
-  if (!file.type.startsWith("image/")) {
-    alert("Please choose an image file.");
-    fileInput.value = "";
-    selectedImageFile = null;
-    return;
-  }
-
   selectedImageFile = file;
-  imageInput.value = "";
+
+  previewImage.src = URL.createObjectURL(file);
+
+  imagePreview.classList.remove("hidden");
+
+  exifStatus.textContent = "Reading EXIF metadata...";
+
+  exifStatus.className = "exif-status warning";
 
   await autofillExifFromFile(file);
+
+  updateMissingFields();
 }
 
 async function autofillExifFromFile(file) {
   if (typeof exifr === "undefined") {
-    console.warn("EXIF library not loaded.");
     return;
   }
 
   try {
     const exif = await exifr.parse(file);
 
-    if (!exif) return;
+    exifDetected = true;
+
+    if (!exif) {
+      exifStatus.textContent = "No EXIF metadata found.";
+
+      return;
+    }
 
     if (exif.Model) {
       cameraInput.value = exif.Model;
@@ -283,184 +461,269 @@ async function autofillExifFromFile(file) {
         .split("T")[0];
     }
 
-    notesInput.value =
-      `${notesInput.value ? notesInput.value + "\n" : ""}` +
-      "EXIF auto-filled from uploaded image.";
+    exifStatus.textContent = "EXIF metadata loaded.";
+
+    exifStatus.className = "exif-status success";
+
+    updateSettingsStatus("exif");
+
+    updateMetadataScore();
+
+    updateMissingFields();
   } catch (error) {
-    console.warn("Could not read EXIF:", error);
+    console.warn(error);
+
+    exifStatus.textContent = "Could not read EXIF.";
+
+    exifStatus.className = "exif-status warning";
   }
 }
 
 // =========================
-// FILTERING
+// STATUS SYSTEM
 // =========================
 
-function getVisibleMoments() {
-  const searchTerm = searchInput.value.toLowerCase().trim();
-  const selectedCategory = filterCategory.value;
+function updateSettingsStatus(type) {
+  settingsStatus.className = "settings-status";
 
-  return [...moments]
-    .filter((moment) => currentView !== "favorites" || moment.favorite)
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .filter((moment) => {
-      const text = `
-        ${moment.title || ""}
-        ${moment.location || ""}
-        ${moment.trip || ""}
-        ${moment.notes || ""}
-        ${moment.lens || ""}
-        ${moment.camera || ""}
-      `.toLowerCase();
+  if (type === "exif") {
+    settingsStatus.textContent = "EXIF detected";
 
-      const matchesSearch = text.includes(searchTerm);
+    settingsStatus.classList.add("exif");
+  }
 
-      const matchesCategory =
-        selectedCategory === "all" ||
-        (moment.category || "").toLowerCase() === selectedCategory;
+  if (type === "preset") {
+    settingsStatus.textContent = "Preset applied";
 
-      return matchesSearch && matchesCategory;
-    });
+    settingsStatus.classList.add("preset");
+  }
+
+  if (type === "manual") {
+    settingsStatus.textContent = "Manual settings";
+
+    settingsStatus.classList.add("manual");
+  }
 }
 
-// =========================
-// RENDER GALLERY
-// =========================
+function updateMetadataScore() {
+  const fields = [
+    titleInput.value,
 
-async function renderMoments() {
-  const visibleMoments = getVisibleMoments();
+    locationInput.value,
 
-  galleryGrid.innerHTML = "";
+    tripInput.value,
 
-  galleryTitle.textContent =
-    currentView === "favorites" ? "Favorites" : "Gallery";
+    dateInput.value,
 
-  const label = visibleMoments.length === 1 ? "moment" : "moments";
-  momentCount.textContent = `${visibleMoments.length} ${label}`;
+    categoryInput.value,
 
-  emptyState.classList.toggle("hidden", visibleMoments.length !== 0);
+    cameraInput.value,
 
-  for (const moment of visibleMoments) {
-    const card = document.createElement("article");
+    lensInput.value,
 
-    const categoryClass = (moment.category || "general")
-      .toLowerCase()
-      .replaceAll(" ", "-");
+    apertureInput.value,
 
-    card.className = `photo-card ${categoryClass}-card`;
+    shutterInput.value,
 
-    const imageSrc = await getMomentImageSrc(moment);
+    isoInput.value,
 
-    card.innerHTML = `
-      <img src="${imageSrc}" alt="${moment.title}" />
+    wbInput.value,
 
-      <button class="favorite-btn ${moment.favorite ? "active" : ""}">
-        ★
-      </button>
+    notesInput.value,
+  ];
 
-      <button class="edit-btn">
-        ✎
-      </button>
+  const filledFields = fields.filter((field) => field && field.trim() !== "");
 
-      <button class="delete-btn">
-        🗑
-      </button>
+  const score = Math.round((filledFields.length / fields.length) * 100);
 
-      <div class="card-overlay"></div>
+  metadataScore.className = "metadata-score";
 
-      <div class="card-content">
-        <span class="trip-badge">
-          ${moment.trip || "General Collection"}
-        </span>
+  if (score < 50) {
+    metadataScore.classList.add("weak");
+  } else if (score < 80) {
+    metadataScore.classList.add("good");
+  } else {
+    metadataScore.classList.add("excellent");
+  }
 
-        <br />
+  metadataScore.textContent = `Metadata: ${score}% complete`;
 
-        <span class="category-badge">
-          ${moment.category}
-        </span>
+  if (score >= 80) {
+    submitBtn.textContent = editingMomentId
+      ? "Update Moment ✓"
+      : "Add Moment ✓";
 
-        <p class="card-location">
-          ${moment.location || "Unknown location"}
-        </p>
+    submitBtn.classList.add("ready");
+  } else {
+    submitBtn.textContent = editingMomentId ? "Update Moment" : "Add Moment";
 
-        <p class="card-date">
-          ${formatDate(moment.date)}
-        </p>
+    submitBtn.classList.remove("ready");
+  }
+}
 
-        <h3 class="card-title">
-          ${moment.title}
-        </h3>
+function updateMissingFields() {
+  const missing = [];
 
-        <p class="card-meta">
-          ${moment.camera} • ${moment.lens}
-        </p>
-      </div>
-    `;
+  if (!titleInput.value.trim()) {
+    missing.push("title");
+  }
 
-    card.querySelector(".favorite-btn").addEventListener("click", (event) => {
-      event.stopPropagation();
+  if (!selectedImageFile && !imageInput.value.trim() && !editingMomentId) {
+    missing.push("image");
+  }
 
-      toggleFavorite(moment.id);
-    });
+  if (!cameraInput.value.trim()) {
+    missing.push("camera");
+  }
 
-    card.querySelector(".edit-btn").addEventListener("click", (event) => {
-      event.stopPropagation();
+  if (!lensInput.value.trim()) {
+    missing.push("lens");
+  }
 
-      startEdit(moment.id);
-    });
+  if (missing.length === 0) {
+    missingFields.textContent = "Ready to save.";
 
-    card.querySelector(".delete-btn").addEventListener("click", (event) => {
-      event.stopPropagation();
+    missingFields.classList.add("ready");
+  } else {
+    missingFields.textContent = `Missing: ${missing.join(", ")}`;
 
-      deleteMoment(moment.id);
-    });
-
-    card.addEventListener("click", () => {
-      openViewer(moment.id);
-    });
-
-    galleryGrid.appendChild(card);
+    missingFields.classList.remove("ready");
   }
 }
 
 // =========================
-// ADD / UPDATE MOMENT
+// VALIDATION
 // =========================
 
-async function addOrUpdateMoment(event) {
+function validateMomentBeforeSave() {
+  const missing = [];
+
+  if (!titleInput.value.trim()) {
+    missing.push("Title");
+  }
+
+  if (!selectedImageFile && !imageInput.value.trim() && !editingMomentId) {
+    missing.push("Image");
+  }
+
+  if (!cameraInput.value.trim()) {
+    missing.push("Camera");
+  }
+
+  if (!lensInput.value.trim()) {
+    missing.push("Lens");
+  }
+
+  if (missing.length > 0) {
+    alert(`Please complete: ${missing.join(", ")}`);
+
+    return false;
+  }
+
+  return true;
+}
+
+// =========================
+// FORM
+// =========================
+
+function resetForm() {
+  momentForm.reset();
+
+  editingMomentId = null;
+
+  selectedImageFile = null;
+
+  exifDetected = false;
+
+  formTitle.textContent = "Add New Moment";
+
+  submitBtn.textContent = "Add Moment";
+
+  cancelEditBtn.classList.add("hidden");
+
+  previewImage.src = "";
+
+  imagePreview.classList.add("hidden");
+
+  updateSettingsStatus("manual");
+
+  updateMetadataScore();
+
+  updateMissingFields();
+}
+
+function clearCameraSettings() {
+  exifDetected = false;
+
+  cameraInput.value = "";
+
+  lensInput.value = "";
+
+  apertureInput.value = "";
+
+  shutterInput.value = "";
+
+  isoInput.value = "";
+
+  wbInput.value = "";
+
+  notesInput.value = "";
+
+  updateSettingsStatus("manual");
+
+  updateMetadataScore();
+
+  updateMissingFields();
+}
+
+// =========================
+// SAVE
+// =========================
+
+function addOrUpdateMoment(event) {
   event.preventDefault();
 
-  const momentId = editingMomentId || crypto.randomUUID();
-
-  let image = imageInput.value.trim();
-  let imageStorage = "url";
-
-  if (selectedImageFile) {
-    await saveImageToDB(momentId, selectedImageFile);
-
-    image = momentId;
-    imageStorage = "indexeddb";
-  }
-
-  if (!image) {
-    alert("Please choose a photo or paste an Image URL.");
+  if (!validateMomentBeforeSave()) {
     return;
   }
 
-  const data = {
+  let imageSource = imageInput.value.trim();
+
+  if (selectedImageFile) {
+    imageSource = previewImage.src;
+  }
+
+  const momentData = {
+    id: editingMomentId || crypto.randomUUID(),
+
     title: titleInput.value.trim(),
+
     location: locationInput.value.trim(),
-    trip: tripInput.value.trim() || "General Collection",
+
+    trip: tripInput.value.trim(),
+
     date: dateInput.value || new Date().toISOString().split("T")[0],
-    image,
-    imageStorage,
+
+    image: imageSource,
+
     category: categoryInput.value,
-    camera: cameraInput.value,
-    lens: lensInput.value,
-    aperture: apertureInput.value,
-    shutter: shutterInput.value,
-    iso: isoInput.value,
-    wb: wbInput.value,
+
+    camera: cameraInput.value.trim(),
+
+    lens: lensInput.value.trim(),
+
+    aperture: apertureInput.value.trim(),
+
+    shutter: shutterInput.value.trim(),
+
+    iso: isoInput.value.trim(),
+
+    wb: wbInput.value.trim(),
+
     notes: notesInput.value.trim(),
+
+    favorite: false,
   };
 
   if (editingMomentId) {
@@ -468,80 +731,163 @@ async function addOrUpdateMoment(event) {
       moment.id === editingMomentId
         ? {
             ...moment,
-            ...data,
+            ...momentData,
           }
         : moment,
     );
   } else {
-    moments.unshift({
-      id: momentId,
-      favorite: false,
-      ...data,
-    });
+    moments.unshift(momentData);
   }
 
   saveMoments();
-  resetForm();
 
-  await renderMoments();
+  renderMoments();
 
   updateStats();
+
+  resetForm();
 }
 
 // =========================
-// EDIT / RESET
+// RENDER
 // =========================
 
-function startEdit(id) {
-  const moment = moments.find((item) => item.id === id);
+function renderMoments() {
+  galleryGrid.innerHTML = "";
 
-  if (!moment) return;
+  const searchTerm = searchInput.value.toLowerCase().trim();
 
-  editingMomentId = id;
+  const selectedCategory = filterCategory.value;
 
-  formTitle.textContent = "Edit Moment";
-  submitBtn.textContent = "Update Moment";
-  cancelEditBtn.classList.remove("hidden");
+  const filteredMoments = moments.filter((moment) => {
+    const matchesSearch =
+      moment.title.toLowerCase().includes(searchTerm) ||
+      moment.location.toLowerCase().includes(searchTerm);
 
-  titleInput.value = moment.title || "";
-  locationInput.value = moment.location || "";
-  tripInput.value = moment.trip || "";
-  dateInput.value = moment.date || "";
+    const matchesCategory =
+      selectedCategory === "all" ||
+      moment.category.toLowerCase() === selectedCategory;
 
-  imageInput.value = moment.imageStorage === "url" ? moment.image : "";
-  selectedImageFile = null;
+    return matchesSearch && matchesCategory;
+  });
 
-  categoryInput.value = moment.category || "Aurora";
-  cameraInput.value = moment.camera || "Nikon Z50";
-  lensInput.value = moment.lens || "DX 16-50mm";
-  apertureInput.value = moment.aperture || "f/5.6";
-  shutterInput.value = moment.shutter || "1/250s";
-  isoInput.value = moment.iso || "Auto";
-  wbInput.value = moment.wb || "Auto";
+  momentCount.textContent = `${filteredMoments.length} moments`;
 
-  notesInput.value = moment.notes || "";
+  if (filteredMoments.length === 0) {
+    emptyState.classList.remove("hidden");
 
-  document.getElementById("add-section").scrollIntoView({
-    behavior: "smooth",
+    return;
+  }
+
+  emptyState.classList.add("hidden");
+
+  filteredMoments.forEach((moment) => {
+    const card = document.createElement("article");
+
+    card.className = "photo-card";
+
+    card.innerHTML = `
+        <button class="favorite-btn ${moment.favorite ? "active" : ""}">
+          ★
+        </button>
+
+        <button class="edit-btn">
+          ✎
+        </button>
+
+        <button class="delete-btn">
+          🗑
+        </button>
+
+        <img
+          src="${moment.image}"
+          alt="${moment.title}"
+        />
+
+        <div class="card-overlay"></div>
+
+        <div class="card-content">
+          <span class="trip-badge">
+            ${moment.trip || "General"}
+          </span>
+
+          <br />
+
+          <span class="category-badge">
+            ${moment.category}
+          </span>
+
+          <p class="card-location">
+            ${moment.location}
+          </p>
+
+          <p class="card-date">
+            ${formatDate(moment.date)}
+          </p>
+
+          <h3 class="card-title">
+            ${moment.title}
+          </h3>
+
+          <p class="card-meta">
+            ${moment.lens}
+          </p>
+        </div>
+      `;
+    if (sortSelect.value === "newest") {
+      filteredMoments.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    if (sortSelect.value === "oldest") {
+      filteredMoments.sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
+
+    if (sortSelect.value === "favorites") {
+      filteredMoments.sort((a, b) => Number(b.favorite) - Number(a.favorite));
+    }
+
+    if (sortSelect.value === "category") {
+      filteredMoments.sort((a, b) => a.category.localeCompare(b.category));
+    }
+    // OPEN VIEWER
+
+    card.addEventListener("click", () => {
+      openPhotoViewer(moment.id);
+    });
+
+    // FAVORITE
+
+    card.querySelector(".favorite-btn").addEventListener("click", (event) => {
+      event.stopPropagation();
+
+      toggleFavorite(moment.id);
+    });
+
+    // EDIT
+
+    card.querySelector(".edit-btn").addEventListener("click", (event) => {
+      event.stopPropagation();
+
+      editMoment(moment.id);
+    });
+
+    // DELETE
+
+    card.querySelector(".delete-btn").addEventListener("click", (event) => {
+      event.stopPropagation();
+
+      deleteMoment(moment.id);
+    });
+
+    galleryGrid.appendChild(card);
   });
 }
 
-function resetForm() {
-  editingMomentId = null;
-  selectedImageFile = null;
-
-  momentForm.reset();
-
-  formTitle.textContent = "Add New Moment";
-  submitBtn.textContent = "Add Moment";
-  cancelEditBtn.classList.add("hidden");
-}
-
 // =========================
-// FAVORITE / DELETE
+// FAVORITE
 // =========================
 
-async function toggleFavorite(id) {
+function toggleFavorite(id) {
   moments = moments.map((moment) =>
     moment.id === id
       ? {
@@ -553,27 +899,139 @@ async function toggleFavorite(id) {
 
   saveMoments();
 
-  await renderMoments();
+  renderMoments();
 
   updateStats();
 }
 
-async function deleteMoment(id) {
-  if (!confirm("Delete this moment?")) return;
+// =========================
+// EDIT
+// =========================
 
-  const momentToDelete = moments.find((moment) => moment.id === id);
+function editMoment(id) {
+  const moment = moments.find((item) => item.id === id);
 
-  if (momentToDelete && momentToDelete.imageStorage === "indexeddb") {
-    await deleteImageFromDB(momentToDelete.image);
-  }
+  if (!moment) return;
+
+  editingMomentId = id;
+
+  formTitle.textContent = "Edit Moment";
+
+  titleInput.value = moment.title;
+
+  locationInput.value = moment.location;
+
+  tripInput.value = moment.trip;
+
+  dateInput.value = moment.date;
+
+  imageInput.value = moment.image;
+
+  categoryInput.value = moment.category;
+
+  cameraInput.value = moment.camera;
+
+  lensInput.value = moment.lens;
+
+  apertureInput.value = moment.aperture;
+
+  shutterInput.value = moment.shutter;
+
+  isoInput.value = moment.iso;
+
+  wbInput.value = moment.wb;
+
+  notesInput.value = moment.notes;
+
+  previewImage.src = moment.image;
+
+  imagePreview.classList.remove("hidden");
+
+  cancelEditBtn.classList.remove("hidden");
+
+  updateMetadataScore();
+
+  updateMissingFields();
+
+  document.getElementById("add-section").scrollIntoView({
+    behavior: "smooth",
+  });
+}
+
+// =========================
+// DELETE
+// =========================
+
+function deleteMoment(id) {
+  const confirmed = confirm("Delete this moment?");
+
+  if (!confirmed) return;
 
   moments = moments.filter((moment) => moment.id !== id);
 
   saveMoments();
 
-  await renderMoments();
+  renderMoments();
 
   updateStats();
+}
+
+// =========================
+// VIEWER
+// =========================
+
+function openPhotoViewer(id) {
+  currentViewerIndex = moments.findIndex((moment) => moment.id === id);
+
+  updateViewerContent();
+
+  photoViewer.classList.add("active");
+
+  document.body.style.overflow = "hidden";
+}
+
+function closePhotoViewer() {
+  photoViewer.classList.remove("active");
+
+  document.body.style.overflow = "auto";
+}
+
+function updateViewerContent() {
+  const moment = moments[currentViewerIndex];
+
+  if (!moment) return;
+
+  viewerImage.src = moment.image;
+
+  viewerTitle.textContent = moment.title;
+
+  viewerCategory.textContent = moment.category;
+
+  viewerLocation.textContent = moment.location;
+
+  viewerMeta.textContent = `${moment.camera} • ${moment.lens} • ${moment.aperture} • ${moment.shutter} • ISO ${moment.iso}`;
+
+  viewerNotes.textContent = moment.notes;
+}
+
+function showNextMoment() {
+  currentViewerIndex++;
+
+  if (currentViewerIndex >= moments.length) {
+    currentViewerIndex = 0;
+  }
+
+  updateViewerContent();
+}
+
+function showPreviousMoment() {
+  currentViewerIndex--;
+
+  if (currentViewerIndex < 0) {
+    currentViewerIndex = moments.length - 1;
+  }
+
+  updateViewerContent();
 }
 
 // =========================
@@ -585,64 +1043,13 @@ function updateStats() {
 
   favoriteStat.textContent = moments.filter((moment) => moment.favorite).length;
 
-  const uniqueCategories = new Set(moments.map((moment) => moment.category));
+  const categories = new Set(moments.map((moment) => moment.category));
 
-  categoryStat.textContent = uniqueCategories.size;
+  categoryStat.textContent = categories.size;
 
   norwayStat.textContent = moments.filter((moment) =>
-    (moment.location || "").toLowerCase().includes("norway"),
+    moment.location.toLowerCase().includes("norway"),
   ).length;
-}
-
-// =========================
-// FULLSCREEN VIEWER
-// =========================
-
-async function openViewer(id) {
-  currentViewerIndex = moments.findIndex((moment) => moment.id === id);
-
-  await updateViewer();
-
-  photoViewer.classList.add("active");
-  document.body.style.overflow = "hidden";
-}
-
-async function updateViewer() {
-  const moment = moments[currentViewerIndex];
-
-  if (!moment) return;
-
-  const imageSrc = await getMomentImageSrc(moment);
-
-  viewerImage.src = imageSrc;
-  viewerImage.alt = moment.title;
-
-  viewerCategory.textContent = moment.category;
-  viewerTitle.textContent = moment.title;
-
-  viewerLocation.textContent = `${moment.location || "Unknown location"} • ${formatDate(moment.date)}`;
-
-  viewerMeta.textContent = `${moment.camera} • ${moment.lens} • ${moment.aperture} • ${moment.shutter} • ISO ${moment.iso} • WB ${moment.wb}`;
-
-  viewerNotes.textContent = moment.notes || "No notes.";
-}
-
-function closeViewer() {
-  photoViewer.classList.remove("active");
-  document.body.style.overflow = "auto";
-}
-
-async function showNextMoment() {
-  currentViewerIndex = (currentViewerIndex + 1) % moments.length;
-
-  await updateViewer();
-}
-
-async function showPreviousMoment() {
-  currentViewerIndex =
-    (currentViewerIndex - 1 + moments.length) % moments.length;
-
-  await updateViewer();
 }
 
 // =========================
@@ -653,113 +1060,118 @@ function updateAssistant() {
   const scenario = assistantScenario.value;
 
   const tips = {
-    aurora:
-      "<strong>Best lens:</strong> Viltrox 13mm f/1.4<br><strong>Mode:</strong> M<br><strong>Start:</strong> f/1.8 • ISO 1600 • 1s • WB 4000K",
-    bluehour:
-      "<strong>Best lens:</strong> DX 12-28mm<br><strong>Mode:</strong> M<br><strong>Start:</strong> f/8 • ISO 100 • 3-8s • WB 3800K",
-    snow: "<strong>Best lens:</strong> DX 16-50mm<br><strong>Mode:</strong> A<br><strong>Start:</strong> f/5.6 • Auto ISO • 1/250s",
-    rain: "<strong>Best lens:</strong> DX 16-50mm<br><strong>Mode:</strong> A<br><strong>Start:</strong> f/5.6-f/8 • Auto ISO",
-    husky:
-      "<strong>Best lens:</strong> DX 50-250mm<br><strong>Mode:</strong> S<br><strong>Start:</strong> 1/1000s • Auto ISO • AF-C",
+    aurora: "Use tripod • ISO 1600 • 1s • Manual focus",
+
+    bluehour: "Use tripod • ISO 100 • Long exposure",
+
+    snow: "Watch highlights in snow",
+
+    rain: "Use reflections and wet streets",
+
+    husky: "Use AF-C and fast shutter",
   };
 
-  const lensTips = {
-    aurora: "Use Viltrox 13mm. DX 16-50mm is backup only.",
-    bluehour: "Use DX 12-28mm. Alternative: DX 16-50mm.",
-    snow: "Use DX 16-50mm for flexibility.",
-    rain: "Use DX 16-50mm and look for reflections.",
-    husky: "Use DX 50-250mm and keep distance.",
-  };
+  assistantOutput.textContent = tips[scenario];
 
-  const weatherTips = {
-    aurora: "Clear sky required • Avoid city lights • Keep battery warm.",
-    bluehour: "Best 15–30 minutes after sunset • Wet streets help.",
-    snow: "Snow reflects massive light • Watch highlights.",
-    rain: "Rain creates reflections • Watch droplets on lens.",
-    husky: "Fast shutter required • Snow background can fool exposure.",
-  };
+  lensAdvice.textContent = "Recommended lens depends on scenario.";
 
-  assistantOutput.innerHTML = tips[scenario];
-  lensAdvice.textContent = lensTips[scenario];
-  weatherAdvice.textContent = weatherTips[scenario];
+  weatherAdvice.textContent = "Weather changes exposure dramatically.";
 }
 
 // =========================
-// PRESETS
+// AURORA
 // =========================
 
-function setupPresets() {
-  presetButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const preset = button.dataset.preset;
+function updateAuroraReadiness() {
+  const allReady = [...auroraChecks].every((check) => check.checked);
 
-      cameraInput.value = "Nikon Z50";
+  if (allReady) {
+    auroraStatus.textContent = "Ready for Aurora shooting.";
 
-      if (preset === "aurora") {
-        categoryInput.value = "Aurora";
-        lensInput.value = "Viltrox 13mm f/1.4";
-        apertureInput.value = "f/1.8";
-        shutterInput.value = "1s";
-        isoInput.value = "1600";
-        wbInput.value = "4000K";
-        notesInput.value = "Tripod • Manual Focus • RAW";
-      }
+    auroraStatus.classList.add("ready");
+  } else {
+    auroraStatus.textContent = "Not ready yet.";
 
-      if (preset === "snow") {
-        categoryInput.value = "Snow";
-        lensInput.value = "DX 16-50mm";
-        apertureInput.value = "f/5.6";
-        shutterInput.value = "1/250s";
-        isoInput.value = "Auto";
-        wbInput.value = "Cloudy";
-        notesInput.value = "Protect highlights in snow.";
-      }
+    auroraStatus.classList.remove("ready");
+  }
+}
 
-      if (preset === "bluehour") {
-        categoryInput.value = "Blue Hour";
-        lensInput.value = "DX 12-28mm";
-        apertureInput.value = "f/8";
-        shutterInput.value = "6s";
-        isoInput.value = "100";
-        wbInput.value = "3800K";
-        notesInput.value = "Tripod • Blue hour • Reflection shots";
-      }
+// =========================
+// SETTINGS
+// =========================
 
-      if (preset === "rain") {
-        categoryInput.value = "Rain";
-        lensInput.value = "DX 16-50mm";
-        apertureInput.value = "f/5.6";
-        shutterInput.value = "1/250s";
-        isoInput.value = "Auto";
-        wbInput.value = "Cloudy";
-        notesInput.value = "Use reflections and wet streets.";
-      }
+function clearAllMoments() {
+  const confirmed = confirm("Delete ALL moments?");
 
-      if (preset === "husky") {
-        categoryInput.value = "Husky";
-        lensInput.value = "DX 50-250mm";
-        apertureInput.value = "f/5.6";
-        shutterInput.value = "1/1000s";
-        isoInput.value = "Auto";
-        wbInput.value = "Cloudy";
-        notesInput.value = "AF-C • Burst mode • Focus on eyes.";
-      }
+  if (!confirmed) return;
+
+  moments = [];
+
+  saveMoments();
+
+  renderMoments();
+
+  updateStats();
+}
+
+// =========================
+// MANUAL DETECTION
+// =========================
+
+function setupManualSettingsDetection() {
+  const fields = [
+    titleInput,
+
+    locationInput,
+
+    tripInput,
+
+    dateInput,
+
+    categoryInput,
+
+    cameraInput,
+
+    lensInput,
+
+    apertureInput,
+
+    shutterInput,
+
+    isoInput,
+
+    wbInput,
+
+    notesInput,
+  ];
+
+  fields.forEach((field) => {
+    field.addEventListener("input", () => {
+      updateSettingsStatus("manual");
+
+      updateMetadataScore();
+
+      updateMissingFields();
     });
   });
 }
 
 // =========================
-// AURORA READINESS
+// IMAGE REMOVE
 // =========================
 
-function updateAuroraReadiness() {
-  const ready = [...auroraChecks].every((check) => check.checked);
+function removeSelectedImage() {
+  selectedImageFile = null;
 
-  auroraStatus.textContent = ready
-    ? "Ready: Viltrox 13mm • f/1.8 • ISO 1600 • 1s • WB 4000K"
-    : "Not ready yet. Complete the checklist before going out.";
+  fileInput.value = "";
 
-  auroraStatus.classList.toggle("ready", ready);
+  imageInput.value = "";
+
+  previewImage.src = "";
+
+  imagePreview.classList.add("hidden");
+
+  updateMissingFields();
 }
 
 // =========================
@@ -768,29 +1180,17 @@ function updateAuroraReadiness() {
 
 function setupNavigation() {
   navItems.forEach((item) => {
-    item.addEventListener("click", async () => {
+    item.addEventListener("click", () => {
       navItems.forEach((btn) => btn.classList.remove("active"));
 
       item.classList.add("active");
 
       const tab = item.dataset.tab;
 
-      currentView = tab === "favorites" ? "favorites" : "gallery";
-
-      if (tab === "gallery" || tab === "favorites") {
-        await renderMoments();
-
+      if (tab === "gallery") {
         document.getElementById("gallery-section").scrollIntoView({
           behavior: "smooth",
         });
-      }
-
-      if (tab === "add") {
-        document.getElementById("add-section").scrollIntoView({
-          behavior: "smooth",
-        });
-
-        titleInput.focus();
       }
 
       if (tab === "assistant") {
@@ -804,138 +1204,194 @@ function setupNavigation() {
           behavior: "smooth",
         });
       }
+
+      if (tab === "add") {
+        document.getElementById("add-section").scrollIntoView({
+          behavior: "smooth",
+        });
+      }
+
+      if (tab === "favorites") {
+        filterCategory.value = "all";
+
+        searchInput.value = "";
+
+        renderMoments();
+
+        galleryGrid.innerHTML = "";
+
+        const favorites = moments.filter((moment) => moment.favorite);
+
+        favorites.forEach((moment) => {
+          const card = document.createElement("article");
+
+          card.className = "photo-card";
+
+          card.innerHTML = `
+                <img
+                  src="${moment.image}"
+                />
+              `;
+
+          galleryGrid.appendChild(card);
+        });
+
+        document.getElementById("gallery-section").scrollIntoView({
+          behavior: "smooth",
+        });
+      }
     });
   });
-}
-
-// =========================
-// SWIPE
-// =========================
-
-function setupSwipeGestures() {
-  photoViewer.addEventListener(
-    "touchstart",
-    (event) => {
-      touchStartX = event.changedTouches[0].screenX;
-    },
-    { passive: true },
-  );
-
-  photoViewer.addEventListener(
-    "touchend",
-    (event) => {
-      touchEndX = event.changedTouches[0].screenX;
-
-      const distance = touchEndX - touchStartX;
-
-      if (distance < -60) showNextMoment();
-      if (distance > 60) showPreviousMoment();
-    },
-    { passive: true },
-  );
-}
-
-// =========================
-// SETTINGS
-// =========================
-
-function clearAllMoments() {
-  if (!confirm("Delete all saved moments?")) return;
-
-  localStorage.removeItem(STORAGE_KEY);
-
-  moments = sampleMoments;
-
-  saveMoments();
-  renderMoments();
-  updateStats();
-}
-
-// =========================
-// HELPERS
-// =========================
-
-function formatDate(dateString) {
-  if (!dateString) return "Unknown Date";
-
-  return new Date(dateString).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function formatShutter(value) {
-  if (!value) return "";
-
-  if (value >= 1) {
-    return `${value}s`;
-  }
-
-  const denominator = Math.round(1 / value);
-
-  return `1/${denominator}s`;
 }
 
 // =========================
 // EVENTS
 // =========================
 
+// FORM
+
 momentForm.addEventListener("submit", addOrUpdateMoment);
+
 cancelEditBtn.addEventListener("click", resetForm);
+
+// FILE
+
 fileInput.addEventListener("change", handleFileUpload);
 
-searchInput.addEventListener("input", renderMoments);
-filterCategory.addEventListener("change", renderMoments);
+imageInput.addEventListener("input", () => {
+  if (!imageInput.value.trim()) {
+    return;
+  }
 
-viewerCloseBtn.addEventListener("click", closeViewer);
-viewerNextBtn.addEventListener("click", showNextMoment);
-viewerPrevBtn.addEventListener("click", showPreviousMoment);
+  selectedImageFile = null;
 
-photoViewer.addEventListener("click", (event) => {
-  if (event.target === photoViewer) closeViewer();
+  previewImage.src = imageInput.value.trim();
+
+  imagePreview.classList.remove("hidden");
+
+  updateMissingFields();
 });
 
+// CATEGORY
+
+categoryInput.addEventListener("change", () => {
+  const presetName = getPresetNameFromCategory(categoryInput.value);
+
+  applyPreset(presetName);
+});
+
+// SETTINGS
+
+clearSettingsBtn.addEventListener("click", clearCameraSettings);
+
+forcePresetBtn.addEventListener("click", forceApplyCurrentPreset);
+
+// IMAGE
+
+removeImageBtn.addEventListener("click", removeSelectedImage);
+
+// SEARCH
+
+searchInput.addEventListener("input", renderMoments);
+
+filterCategory.addEventListener("change", renderMoments);
+
+// VIEWER
+
+viewerCloseBtn.addEventListener("click", closePhotoViewer);
+
+viewerNextBtn.addEventListener("click", showNextMoment);
+
+viewerPrevBtn.addEventListener("click", showPreviousMoment);
+
+// ASSISTANT
+
 assistantScenario.addEventListener("change", updateAssistant);
+
+// AURORA
 
 auroraChecks.forEach((check) => {
   check.addEventListener("change", updateAuroraReadiness);
 });
 
+// SETTINGS
+
+clearDataBtn.addEventListener("click", clearAllMoments);
+
+sortSelect.addEventListener("change", renderMoments);
+
+// FLOATING BUTTON
+
 floatingAddBtn.addEventListener("click", () => {
   document.getElementById("add-section").scrollIntoView({
     behavior: "smooth",
   });
-
-  titleInput.focus();
 });
 
-clearDataBtn.addEventListener("click", clearAllMoments);
+// KEYBOARD
 
 document.addEventListener("keydown", (event) => {
-  if (!photoViewer.classList.contains("active")) return;
+  if (!photoViewer.classList.contains("active")) {
+    return;
+  }
 
-  if (event.key === "Escape") closeViewer();
-  if (event.key === "ArrowRight") showNextMoment();
-  if (event.key === "ArrowLeft") showPreviousMoment();
+  if (event.key === "Escape") {
+    closePhotoViewer();
+  }
+
+  if (event.key === "ArrowRight") {
+    showNextMoment();
+  }
+
+  if (event.key === "ArrowLeft") {
+    showPreviousMoment();
+  }
+});
+
+// =========================
+// PWA
+// =========================
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+
+  deferredPrompt = event;
 });
 
 // =========================
 // INIT
 // =========================
 
-async function initApp() {
+function initApp() {
   loadMoments();
 
-  await renderMoments();
+  renderMoments();
 
   updateStats();
+
   updateAssistant();
+
   updateAuroraReadiness();
 
-  setupPresets();
+  updateSettingsStatus("manual");
+
+  updateMetadataScore();
+
+  updateMissingFields();
+
   setupNavigation();
-  setupSwipeGestures();
+
+  setupManualSettingsDetection();
 }
 
 initApp();
+
+// =========================
+// SERVICE WORKER
+// =========================
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js");
+  });
+}
