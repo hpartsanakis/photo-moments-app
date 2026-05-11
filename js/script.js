@@ -701,7 +701,8 @@ function addOrUpdateMoment(event) {
 
     date: dateInput.value || new Date().toISOString().split("T")[0],
 
-    image: imageSource,
+    images: [imageSource],
+    thumbnail: imageSource,
 
     category: categoryInput.value,
 
@@ -804,7 +805,7 @@ function renderMoments() {
         </button>
 
         <img
-          src="${moment.image}"
+          src="${moment.thumbnail}"
           alt="${moment.title}"
         />
 
@@ -947,7 +948,7 @@ function editMoment(id) {
 
   notesInput.value = moment.notes;
 
-  previewImage.src = moment.image;
+  previewImage.src = moment.thumbnail;
 
   imagePreview.classList.remove("hidden");
 
@@ -1005,7 +1006,7 @@ function updateViewerContent() {
 
   if (!moment) return;
 
-  viewerImage.src = moment.image;
+  viewerImage.src = moment.thumbnail;
 
   viewerTitle.textContent = moment.title;
 
