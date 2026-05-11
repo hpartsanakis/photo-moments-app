@@ -150,7 +150,8 @@ function renderMoments() {
     return matchesSearch && matchesCategory;
   });
 
-  momentCount.textContent = `${filteredMoments.length} moments`;
+  const label = filteredMoments.length === 1 ? "moment" : "moments";
+  momentCount.textContent = `${filteredMoments.length} ${label}`;
 
   if (filteredMoments.length === 0) {
     emptyState.classList.add("active");
