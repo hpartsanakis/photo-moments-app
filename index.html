@@ -67,7 +67,7 @@
           <!-- Local image picker -->
           <label class="file-label">
             <span>Choose photo from Finder / iPhone</span>
-            <input id="file-input" type="file" accept="image/*" />
+            <input id="file-input" type="file" accept="image/*" multiple />
           </label>
 
           <!-- EXIF status -->
@@ -269,6 +269,49 @@
           <p>Add a new photo moment or change your search/filter.</p>
         </div>
       </section>
+      <!-- ========================= -->
+      <!-- ANALYTICS -->
+      <!-- ========================= -->
+
+      <section class="analytics-section" id="analytics-section">
+        <div class="section-header">
+          <h2>Photography Analytics</h2>
+
+          <span>Your shooting behavior</span>
+        </div>
+
+        <div class="analytics-grid">
+          <article class="analytics-card">
+            <p>Most Used Camera</p>
+            <h3 id="analytics-camera">-</h3>
+          </article>
+
+          <article class="analytics-card">
+            <p>Most Used Lens</p>
+            <h3 id="analytics-lens">-</h3>
+          </article>
+
+          <article class="analytics-card">
+            <p>Favorite Category</p>
+            <h3 id="analytics-category">-</h3>
+          </article>
+
+          <article class="analytics-card">
+            <p>Average ISO</p>
+            <h3 id="analytics-iso">-</h3>
+          </article>
+
+          <article class="analytics-card">
+            <p>Total Photos</p>
+            <h3 id="analytics-photos">0</h3>
+          </article>
+
+          <article class="analytics-card">
+            <p>Total Moments</p>
+            <h3 id="analytics-moments">0</h3>
+          </article>
+        </div>
+      </section>
 
       <!-- SETTINGS -->
       <section class="settings-section" id="settings-section">
@@ -336,6 +379,11 @@
       <button class="nav-item" data-tab="assistant">
         <span>🤖</span>
         <p>Assistant</p>
+      </button>
+
+      <button class="nav-item" data-tab="analytics">
+        <span>📊</span>
+        <p>Analytics</p>
       </button>
 
       <button class="nav-item" data-tab="settings">

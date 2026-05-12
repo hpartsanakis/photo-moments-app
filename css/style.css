@@ -1050,3 +1050,57 @@ form {
   height: 34px;
   font-size: 14px;
 }
+
+/* ========================= */
+/* ANALYTICS */
+/* ========================= */
+
+.analytics-section {
+  margin-bottom: 36px;
+}
+
+.analytics-grid {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+  gap: 18px;
+}
+
+.analytics-card {
+  padding: 24px;
+
+  border-radius: 24px;
+
+  background: rgba(255, 255, 255, 0.06);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  backdrop-filter: blur(18px);
+
+  box-shadow: var(--shadow-soft);
+
+  transition:
+    transform 0.25s ease,
+    border 0.25s ease;
+}
+
+.analytics-card:hover {
+  transform: translateY(-4px);
+
+  border: 1px solid rgba(95, 255, 178, 0.25);
+}
+
+.analytics-card p {
+  color: var(--text-soft);
+
+  font-size: 13px;
+
+  margin-bottom: 10px;
+}
+
+.analytics-card h3 {
+  font-size: 20px;
+
+  line-height: 1.4;
+}
