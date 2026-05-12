@@ -11,8 +11,6 @@ let currentView = "gallery";
 let selectedImageFiles = [];
 let exifDetected = false;
 
-const STORAGE_KEY = "photo-moments-app-data";
-
 // =========================
 // SELECTORS
 // =========================
@@ -95,25 +93,6 @@ const analyticsMoments = document.getElementById("analytics-moments");
 const lensChart = document.getElementById("lens-chart");
 
 // =========================
-// STORAGE
-// =========================
-
-function saveMoments() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(moments));
-}
-
-function loadMoments() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-
-  if (saved) {
-    moments = JSON.parse(saved);
-  } else {
-    moments = sampleMoments;
-    saveMoments();
-  }
-}
-
-// =========================
 // IMAGE HELPERS
 // =========================
 
@@ -132,11 +111,15 @@ async function getImageSrc(imageItem) {
 }
 
 async function getMomentThumbnail(moment) {
-  if (moment.thumbnail) return moment.thumbnail;
+  if (moment.images && moment.images.length > 0) {
+    return await getImageSrc(moment.images[0]);
+  }
 
-  const firstImage = moment.images?.[0];
+  if (moment.thumbnail && moment.thumbnail.startsWith("http")) {
+    return moment.thumbnail;
+  }
 
-  return await getImageSrc(firstImage);
+  return "";
 }
 
 // =========================
@@ -464,7 +447,7 @@ async function addOrUpdateMoment(event) {
       });
     }
 
-    thumbnail = await getImageSrc(images[0]);
+    thumbnail = images[0].id;
   } else if (imageInput.value.trim()) {
     images = [
       {
@@ -707,7 +690,7 @@ async function deleteMoment(id) {
   saveMoments();
   await renderMoments();
   updateStats();
-  updateLensChart();
+  refreshAnalytics();
 }
 
 // =========================
@@ -813,63 +796,6 @@ function updateAssistant() {
   weatherAdvice.textContent = "Weather changes exposure dramatically.";
 }
 
-function updateAnalytics() {
-  analyticsMoments.textContent = moments.length;
-
-  // =========================
-  // TOTAL PHOTOS
-  // =========================
-
-  let totalPhotos = 0;
-
-  moments.forEach((moment) => {
-    totalPhotos += moment.images?.length || 1;
-  });
-
-  analyticsPhotos.textContent = totalPhotos;
-
-  // =========================
-  // CAMERA
-  // =========================
-
-  const cameras = moments.map((moment) => moment.camera);
-
-  analyticsCamera.textContent = getMostUsed(cameras);
-
-  // =========================
-  // LENS
-  // =========================
-
-  const lenses = moments.map((moment) => moment.lens);
-
-  analyticsLens.textContent = getMostUsed(lenses);
-
-  // =========================
-  // CATEGORY
-  // =========================
-
-  const categories = moments.map((moment) => moment.category);
-
-  analyticsCategory.textContent = getMostUsed(categories);
-
-  // =========================
-  // ISO
-  // =========================
-
-  const isoValues = moments
-    .map((moment) => parseInt(moment.iso))
-    .filter((value) => !isNaN(value));
-
-  if (isoValues.length > 0) {
-    const totalISO = isoValues.reduce((sum, value) => sum + value, 0);
-
-    const averageISO = Math.round(totalISO / isoValues.length);
-
-    analyticsISO.textContent = averageISO;
-  } else {
-    analyticsISO.textContent = "-";
-  }
-}
 // =========================
 // SETTINGS
 // =========================
@@ -878,51 +804,10 @@ function clearAllMoments() {
   if (!confirm("Delete ALL moments?")) return;
 
   moments = [];
-  localStorage.removeItem(STORAGE_KEY);
+  clearStoredMoments();
 
   renderMoments();
   updateStats();
-}
-
-function updateLensChart() {
-  lensChart.innerHTML = "";
-
-  const lensCounts = {};
-
-  moments.forEach((moment) => {
-    if (!moment.lens) return;
-
-    lensCounts[moment.lens] = (lensCounts[moment.lens] || 0) + 1;
-  });
-
-  const entries = Object.entries(lensCounts).sort((a, b) => b[1] - a[1]);
-
-  if (entries.length === 0) {
-    lensChart.innerHTML = `<p class="card-meta">No lens data yet.</p>`;
-    return;
-  }
-
-  const maxCount = entries[0][1];
-
-  entries.forEach(([lens, count]) => {
-    const percent = Math.round((count / maxCount) * 100);
-
-    const row = document.createElement("div");
-    row.className = "lens-bar-row";
-
-    row.innerHTML = `
-      <div class="lens-bar-label">
-        <span>${lens}</span>
-        <strong>${count}</strong>
-      </div>
-
-      <div class="lens-bar-track">
-        <div class="lens-bar-fill" style="width: ${percent}%"></div>
-      </div>
-    `;
-
-    lensChart.appendChild(row);
-  });
 }
 
 // =========================
@@ -1082,8 +967,7 @@ async function initApp() {
   updateSettingsStatus("manual");
   updateMetadataScore();
   updateMissingFields();
-  updateAnalytics();
-  updateLensChart();
+  refreshAnalytics();
   setupNavigation();
   setupManualSettingsDetection();
 }
@@ -1110,19 +994,4 @@ function formatShutter(value) {
   if (value >= 1) return `${value}s`;
 
   return `1/${Math.round(1 / value)}s`;
-}
-function getMostUsed(items) {
-  if (items.length === 0) {
-    return "-";
-  }
-
-  const counts = {};
-
-  items.forEach((item) => {
-    if (!item) return;
-
-    counts[item] = (counts[item] || 0) + 1;
-  });
-
-  return Object.keys(counts).reduce((a, b) => (counts[a] > counts[b] ? a : b));
 }
