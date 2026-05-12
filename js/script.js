@@ -92,6 +92,7 @@ const analyticsCategory = document.getElementById("analytics-category");
 const analyticsISO = document.getElementById("analytics-iso");
 const analyticsPhotos = document.getElementById("analytics-photos");
 const analyticsMoments = document.getElementById("analytics-moments");
+const lensChart = document.getElementById("lens-chart");
 
 // =========================
 // PRESET LIBRARY
@@ -810,6 +811,7 @@ async function deleteMoment(id) {
   saveMoments();
   await renderMoments();
   updateStats();
+  updateLensChart();
 }
 
 // =========================
@@ -986,6 +988,47 @@ function clearAllMoments() {
   updateStats();
 }
 
+function updateLensChart() {
+  lensChart.innerHTML = "";
+
+  const lensCounts = {};
+
+  moments.forEach((moment) => {
+    if (!moment.lens) return;
+
+    lensCounts[moment.lens] = (lensCounts[moment.lens] || 0) + 1;
+  });
+
+  const entries = Object.entries(lensCounts).sort((a, b) => b[1] - a[1]);
+
+  if (entries.length === 0) {
+    lensChart.innerHTML = `<p class="card-meta">No lens data yet.</p>`;
+    return;
+  }
+
+  const maxCount = entries[0][1];
+
+  entries.forEach(([lens, count]) => {
+    const percent = Math.round((count / maxCount) * 100);
+
+    const row = document.createElement("div");
+    row.className = "lens-bar-row";
+
+    row.innerHTML = `
+      <div class="lens-bar-label">
+        <span>${lens}</span>
+        <strong>${count}</strong>
+      </div>
+
+      <div class="lens-bar-track">
+        <div class="lens-bar-fill" style="width: ${percent}%"></div>
+      </div>
+    `;
+
+    lensChart.appendChild(row);
+  });
+}
+
 // =========================
 // MANUAL DETECTION
 // =========================
@@ -1144,7 +1187,7 @@ async function initApp() {
   updateMetadataScore();
   updateMissingFields();
   updateAnalytics();
-
+  updateLensChart();
   setupNavigation();
   setupManualSettingsDetection();
 }
