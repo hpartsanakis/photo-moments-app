@@ -51,8 +51,14 @@
           <input id="date-input" type="date" />
 
           <label class="file-label">
-            <span>Choose photo from Finder / iPhone</span>
-            <input id="file-input" type="file" accept="image/*" multiple />
+            <span>Choose photo</span>
+            <input
+              id="file-input"
+              type="file"
+              accept="image/*"
+              capture="enviroment"
+              multiple
+            />
           </label>
 
           <input id="image-input" type="url" placeholder="Or paste image URL" />
