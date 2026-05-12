@@ -1,18 +1,16 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Basic document setup -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Photo Moments App</title>
 
-    <!-- PWA / App icons -->
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/png" href="icons/icon-192.png" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <meta name="theme-color" content="#0b0f19" />
 
-    <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
@@ -21,21 +19,17 @@
       rel="stylesheet"
     />
 
-    <!-- Main CSS -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
 
   <body>
-    <!-- Main app content -->
     <main class="app-shell">
       <!-- HEADER -->
-      <header class="app-header" id="home-section">
+      <header class="app-header">
         <p class="eyebrow">Cinematic Photography Journal</p>
-
         <h1>📸 Photo Moments</h1>
-
         <p class="header-text">
-          Save your photos, trips, camera settings, EXIF data and field notes.
+          Save your travel photos, camera settings and personal field notes.
         </p>
       </header>
 
@@ -43,44 +37,26 @@
       <section class="form-card" id="add-section">
         <div class="section-header">
           <h2 id="form-title">Add New Moment</h2>
-          <span>Photo Journal Entry</span>
         </div>
 
         <form id="moment-form">
-          <button type="button" class="secondary-btn" id="ai-title-btn">
-            ✨ AI Generate Title
-          </button>
-
-          <!-- Basic metadata -->
-          <input id="title-input" type="text" placeholder="Title" required />
-
           <input
-            id="location-input"
+            id="title-input"
             type="text"
-            placeholder="Location e.g. Tromsø • Norway"
+            placeholder="Moment title"
+            required
           />
-
-          <input
-            id="trip-input"
-            type="text"
-            placeholder="Trip e.g. Tromsø Aurora Expedition"
-          />
-
+          <input id="location-input" type="text" placeholder="Location" />
+          <input id="trip-input" type="text" placeholder="Trip / Expedition" />
           <input id="date-input" type="date" />
 
-          <!-- Local image picker -->
           <label class="file-label">
             <span>Choose photo from Finder / iPhone</span>
             <input id="file-input" type="file" accept="image/*" multiple />
           </label>
 
-          <!-- EXIF status -->
-          <p class="exif-status" id="exif-status">No photo selected yet.</p>
+          <input id="image-input" type="url" placeholder="Or paste image URL" />
 
-          <!-- Alternative image URL -->
-          <input id="image-input" type="url" placeholder="Or paste Image URL" />
-
-          <!-- Image preview -->
           <div class="image-preview hidden" id="image-preview">
             <button
               type="button"
@@ -89,148 +65,54 @@
             >
               ✕
             </button>
-
             <img id="preview-image" src="" alt="Selected preview" />
           </div>
 
-          <!-- Category controls preset behavior -->
           <select id="category-input">
             <option value="Aurora">Aurora</option>
             <option value="Snow">Snow</option>
             <option value="Rain">Rain</option>
-            <option value="Street">Street</option>
             <option value="Street Night">Street Night</option>
-            <option value="Reflection">Reflection</option>
-            <option value="Portrait">Portrait</option>
             <option value="Blue Hour">Blue Hour</option>
             <option value="Husky">Husky</option>
+            <option value="Portrait">Portrait</option>
+            <option value="Reflection">Reflection</option>
           </select>
 
-          <!-- Camera settings / EXIF fields -->
           <div class="settings-grid">
-            <input
-              id="camera-input"
-              type="text"
-              placeholder="Camera e.g. Nikon Z50"
-            />
-
-            <input
-              id="lens-input"
-              type="text"
-              placeholder="Lens e.g. DX 16-50mm"
-            />
-
-            <input
-              id="aperture-input"
-              type="text"
-              placeholder="Aperture e.g. f/5.6"
-            />
-
-            <input
-              id="shutter-input"
-              type="text"
-              placeholder="Shutter e.g. 1/250s"
-            />
-
-            <input id="iso-input" type="text" placeholder="ISO e.g. 1600" />
-
-            <input
-              id="wb-input"
-              type="text"
-              placeholder="White Balance e.g. 4000K"
-            />
+            <input id="camera-input" type="text" placeholder="Camera" />
+            <input id="lens-input" type="text" placeholder="Lens" />
+            <input id="aperture-input" type="text" placeholder="Aperture" />
+            <input id="shutter-input" type="text" placeholder="Shutter" />
+            <input id="iso-input" type="text" placeholder="ISO" />
+            <input id="wb-input" type="text" placeholder="White Balance" />
           </div>
 
-          <!-- Camera settings actions -->
-          <button type="button" class="secondary-btn" id="clear-settings-btn">
-            Clear Camera Settings
-          </button>
+          <textarea
+            id="notes-input"
+            placeholder="Notes / Story / Shooting conditions"
+          ></textarea>
 
-          <button type="button" class="secondary-btn" id="force-preset-btn">
-            Apply Category Preset Anyway
-          </button>
+          <div class="action-row">
+            <button type="submit" class="primary-btn" id="submit-btn">
+              Add Moment
+            </button>
 
-          <!-- Settings feedback -->
-          <p class="settings-status manual" id="settings-status">
-            Manual settings
-          </p>
-
-          <p class="metadata-score weak" id="metadata-score">
-            Metadata: 0% complete
-          </p>
-
-          <p class="missing-fields" id="missing-fields">
-            Missing: title, image
-          </p>
-
-          <!-- Free notes -->
-          <textarea id="notes-input" placeholder="Field notes"></textarea>
-
-          <!-- Save buttons -->
-          <button type="submit" class="primary-btn" id="submit-btn">
-            Add Moment
-          </button>
-
-          <button
-            type="button"
-            class="secondary-btn hidden"
-            id="cancel-edit-btn"
-          >
-            Cancel Edit
-          </button>
+            <button
+              type="button"
+              class="secondary-btn hidden"
+              id="cancel-edit-btn"
+            >
+              Cancel Edit
+            </button>
+          </div>
         </form>
-      </section>
-
-      <!-- STATS DASHBOARD -->
-      <section class="stats-grid" id="stats-section">
-        <article class="stat-card">
-          <p class="stat-label">Total Moments</p>
-          <h3 id="total-stat">0</h3>
-        </article>
-
-        <article class="stat-card">
-          <p class="stat-label">Favorites</p>
-          <h3 id="favorite-stat">0</h3>
-        </article>
-
-        <article class="stat-card">
-          <p class="stat-label">Categories</p>
-          <h3 id="category-stat">0</h3>
-        </article>
-
-        <article class="stat-card">
-          <p class="stat-label">Norway Shots</p>
-          <h3 id="norway-stat">0</h3>
-        </article>
-      </section>
-
-      <!-- AI SHOOTING ASSISTANT -->
-      <section class="assistant-section" id="assistant-section">
-        <div class="section-header">
-          <h2>AI Shooting Assistant</h2>
-          <span>Field Guide</span>
-        </div>
-
-        <div class="assistant-card">
-          <select id="assistant-scenario">
-            <option value="aurora">Aurora Night</option>
-            <option value="bluehour">Blue Hour City</option>
-            <option value="snow">Snow Street</option>
-            <option value="rain">Rainy Window</option>
-            <option value="husky">Husky Action</option>
-          </select>
-
-          <div class="assistant-output" id="assistant-output"></div>
-          <div class="lens-advice" id="lens-advice"></div>
-          <div class="weather-advice" id="weather-advice"></div>
-        </div>
       </section>
 
       <!-- GALLERY -->
       <section class="gallery-section" id="gallery-section">
         <div class="section-header">
           <h2 id="gallery-title">Gallery</h2>
-          <span id="moment-count">0 moments</span>
         </div>
 
         <div class="gallery-controls">
@@ -245,101 +127,43 @@
             <option value="aurora">Aurora</option>
             <option value="snow">Snow</option>
             <option value="rain">Rain</option>
-            <option value="street">Street</option>
             <option value="street night">Street Night</option>
-            <option value="reflection">Reflection</option>
-            <option value="portrait">Portrait</option>
             <option value="blue hour">Blue Hour</option>
             <option value="husky">Husky</option>
+            <option value="portrait">Portrait</option>
+            <option value="reflection">Reflection</option>
           </select>
+        </div>
 
-          <select id="sort-select">
-            <option value="newest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-            <option value="favorites">Favorites first</option>
-            <option value="category">Category A–Z</option>
-          </select>
-
-          <button type="button" class="secondary-btn" id="view-toggle-btn">
-            Compact View
-          </button>
+        <div class="empty-state hidden" id="empty-state">
+          <h3>No moments found</h3>
+          <p>Add a new moment or change your search/filter.</p>
         </div>
 
         <div class="gallery-grid" id="gallery-grid"></div>
-
-        <div class="empty-state hidden" id="empty-state">
-          <div class="empty-icon">📸</div>
-          <h3>No moments found</h3>
-          <p>Add a new photo moment or change your search/filter.</p>
-        </div>
-      </section>
-      <!-- ========================= -->
-      <!-- ANALYTICS -->
-      <!-- ========================= -->
-
-      <section class="analytics-section" id="analytics-section">
-        <div class="section-header">
-          <h2>Photography Analytics</h2>
-
-          <span>Your shooting behavior</span>
-        </div>
-
-        <div class="analytics-grid">
-          <article class="analytics-card">
-            <p>Most Used Camera</p>
-            <h3 id="analytics-camera">-</h3>
-          </article>
-
-          <article class="analytics-card">
-            <p>Most Used Lens</p>
-            <h3 id="analytics-lens">-</h3>
-          </article>
-
-          <div class="lens-chart-card">
-            <h3>Lens Usage</h3>
-            <div id="lens-chart" class="lens-chart"></div>
-          </div>
-
-          <article class="analytics-card">
-            <p>Favorite Category</p>
-            <h3 id="analytics-category">-</h3>
-          </article>
-
-          <article class="analytics-card">
-            <p>Average ISO</p>
-            <h3 id="analytics-iso">-</h3>
-          </article>
-
-          <article class="analytics-card">
-            <p>Total Photos</p>
-            <h3 id="analytics-photos">0</h3>
-          </article>
-
-          <article class="analytics-card">
-            <p>Total Moments</p>
-            <h3 id="analytics-moments">0</h3>
-          </article>
-        </div>
       </section>
 
       <!-- SETTINGS -->
       <section class="settings-section" id="settings-section">
         <div class="section-header">
           <h2>Settings</h2>
-          <span>Local App</span>
         </div>
 
         <div class="settings-card">
           <p>
-            Metadata is saved in <strong>localStorage</strong>. Photos are saved
-            in <strong>IndexedDB</strong>.
+            Photos are saved locally in IndexedDB. Metadata is saved in
+            localStorage.
           </p>
 
           <button class="danger-btn" id="clear-data-btn">
-            Clear All Moments
+            Delete All Moments
           </button>
         </div>
       </section>
+
+      <footer class="app-footer">
+        <p>Photo Moments App • v1.0.0</p>
+      </footer>
     </main>
 
     <!-- FULLSCREEN VIEWER -->
@@ -347,18 +171,18 @@
       <button class="viewer-close-btn" id="viewer-close-btn">✕</button>
 
       <button class="viewer-nav-btn viewer-prev-btn" id="viewer-prev-btn">
-        ‹
+        ←
       </button>
 
       <img id="viewer-image" src="" alt="" />
 
       <button class="viewer-nav-btn viewer-next-btn" id="viewer-next-btn">
-        ›
+        →
       </button>
 
       <div class="viewer-info">
-        <span id="viewer-category"></span>
         <h2 id="viewer-title"></h2>
+        <p id="viewer-category"></p>
         <p id="viewer-location"></p>
         <p id="viewer-meta"></p>
         <p id="viewer-notes"></p>
@@ -368,16 +192,11 @@
     <!-- FLOATING ADD BUTTON -->
     <button class="floating-add-btn" id="floating-add-btn">+</button>
 
-    <!-- BOTTOM NAVIGATION -->
+    <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
       <button class="nav-item active" data-tab="gallery">
         <span>📸</span>
         <p>Gallery</p>
-      </button>
-
-      <button class="nav-item" data-tab="favorites">
-        <span>⭐</span>
-        <p>Favorites</p>
       </button>
 
       <button class="nav-item" data-tab="add">
@@ -385,34 +204,19 @@
         <p>Add</p>
       </button>
 
-      <button class="nav-item" data-tab="assistant">
-        <span>🤖</span>
-        <p>Assistant</p>
-      </button>
-
-      <button class="nav-item" data-tab="analytics">
-        <span>📊</span>
-        <p>Analytics</p>
+      <button class="nav-item" data-tab="favorites">
+        <span>★</span>
+        <p>Favorites</p>
       </button>
 
       <button class="nav-item" data-tab="settings">
-        <span>⚙️</span>
+        <span>⚙</span>
         <p>Settings</p>
       </button>
     </nav>
 
-    <!-- Scripts: EXIF first, DB second, app last -->
     <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
     <script src="js/image-db.js"></script>
-    <script src="js/sample-data.js"></script>
-    <script src="js/presets.js"></script>
-    <script src="js/storage.js"></script>
-    <script src="js/analytics.js"></script>
-    <script src="js/exif.js"></script>
-    <script src="js/status-ui.js"></script>
-    <script src="js/viewer.js"></script>
-    <script src="js/gallery.js"></script>
-    <script src="js/ai.js"></script>
     <script src="js/script.js"></script>
   </body>
 </html>
