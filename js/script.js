@@ -92,6 +92,9 @@ const analyticsPhotos = document.getElementById("analytics-photos");
 const analyticsMoments = document.getElementById("analytics-moments");
 const lensChart = document.getElementById("lens-chart");
 
+// AI SYSTEM
+const aiTitleBtn = document.getElementById("ai-title-btn");
+
 // =========================
 // IMAGE HELPERS
 // =========================
@@ -121,8 +124,6 @@ async function getMomentThumbnail(moment) {
 
   return "";
 }
-
-
 
 // =========================
 // PRESETS
@@ -172,8 +173,6 @@ function forceApplyCurrentPreset() {
   updateMetadataScore();
   updateMissingFields();
 }
-
-
 
 // =========================
 // FORM ACTIONS
@@ -319,10 +318,6 @@ async function addOrUpdateMoment(event) {
   updateStats();
   resetForm();
 }
-
-
-
-
 
 // =========================
 // STATS
@@ -518,6 +513,8 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowRight") showNextMoment();
   if (event.key === "ArrowLeft") showPreviousMoment();
 });
+
+aiTitleBtn.addEventListener("click", generateAITitle);
 
 // =========================
 // INIT
